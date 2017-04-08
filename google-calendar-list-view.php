@@ -49,7 +49,6 @@ class gclv{
 	public function enable_language_translation(){
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
-	
 	public function init_settings(){
 		$this->settings['version'] = 100;
 		$this->settings['db_version'] = 100;
