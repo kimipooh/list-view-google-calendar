@@ -26,7 +26,7 @@ class gclv{
 		'api-url'		=> 'https://www.googleapis.com/calendar/v3/calendars/',
 		'start-date'	=> '',					// Default events are from today to the future.
 		'end-date'		=> '',
-		'orderby'		=> 'startTime',			// startTime, updated (only ascending).
+		'orderby'		=> 'startTime',		// startTime, updated (only ascending).
 		'orderbysort'	=> 'ascending',			// ascending or descending.
 		'maxResults'	=> '',  // <= 2500 (https://developers.google.com/google-apps/calendar/v3/reference/events/list)
 		'html_tag'		=> '',
