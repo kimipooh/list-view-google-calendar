@@ -33,7 +33,7 @@ The following shortcode option is priority than setting values.
 6. g_api_key is Google Calendar API Key. If you use multi Google Calendar API Key, set this value.
 7. HTML tag is used by the output Google Calendar events. The tag class is "list-view-google-calendar".
 
-About the detail information, Please see "Google Calendar List View Settings" in Setting menu.
+About the detail information, Please see "Google Calendar List View Settings" in Setting menu or https://kitaney-wordpress.blogspot.jp/2017/04/google-calendar-list-view-google.html (in Japanese).
 
 == Frequently Asked Questions ==
 = How to get past events. =
@@ -45,6 +45,10 @@ Please check "Google Calendar API Key" or "Google Calendar ID". If their setting
 
 = Can get events in multi Google Calendar? =
 Yes. You can set Google Calendar ID and API Key in the shortcode.
+
+= How to remove the settings =
+Deactivate the plugin.
+
 
 == Screenshots ==
 1. List View of a public Google Calendar
