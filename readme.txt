@@ -48,8 +48,10 @@ Yes. You can set Google Calendar ID and API Key in the shortcode.
 
 == Screenshots ==
 1. List View of a public Google Calendar
-2. How to use it.
-3. 
+2. How to use the Shortcode
+3. How to use it
+4. Goolge Calendar API Settings
+5. General Settngs
 
 == Changelog ==
 
