@@ -53,9 +53,10 @@ Deactivate the plugin.
 == Screenshots ==
 1. List View of a public Google Calendar
 2. How to use the Shortcode
-3. How to use it
-4. Goolge Calendar API Settings
-5. General Settngs
+3. Sample of public Google Calendars
+4. How to use it
+5. Goolge Calendar API Settings
+6. General Settngs
 
 == Changelog ==
 
