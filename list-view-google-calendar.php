@@ -6,19 +6,19 @@ Description: The plugin is to create a shortcode for displaying the list view of
 Version: 1.0
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
-Text Domain: google-calendar-list-view
+Text Domain: list-view-google-calendar
 Domain Path: /lang
 */
 
 $wm = new gclv();
 
 class gclv{
-	var $set_op = 'google-calendar-list-view_array';	// Save setting name in DB
-	var $plugin_name = 'google-calendar-list-view';
+	var $set_op = 'list-view-google-calendar_array';	// Save setting name in DB
+	var $plugin_name = 'list-view-google-calendar';
 	var $plugin_title = 'Google Calendar List View';
 	var $plugin_shortcode = 'gc_list_view';
 	var $default_maxResults = 10;  
-	var $html_tags = array('li', 'p', 'dd'); 
+	var $html_tags = array('li'=>'li', 'p'=>'p', 'dd'=>'dd'); 
 	var $default_html_tag = 'li'; 
 	var $google_calendar = array( 
 		'api-key'		=> '',
@@ -26,10 +26,10 @@ class gclv{
 		'api-url'		=> 'https://www.googleapis.com/calendar/v3/calendars/',
 		'start-date'	=> '',					// Default events are from today to the future.
 		'end-date'		=> '',
-		'orderby'		=> 'startTime',		// startTime, updated (only ascending).
+		'orderby'		=> 'startTime',			// startTime, updated (only ascending).
 		'orderbysort'	=> 'ascending',			// ascending or descending.
 		'maxResults'	=> '',  // <= 2500 (https://developers.google.com/google-apps/calendar/v3/reference/events/list)
-		'html_tag'		=> '',
+		'html-tag'		=> '',
 	);
 	var $lang_dir = 'lang';	// Language folder name
 	var $settings;
@@ -66,17 +66,31 @@ class gclv{
     	    'end_date'		=> '',
     	    'date_format'	=> 'Y.m.d', 
 			'orderbysort'	=> '',			// ascending or descending.
+			'html_tag'		=> '',
+			'g_api_key'		=> '',			// Google Calendar API KEY
+			'g_id'			=> '',			// Google Calendar ID
 	    ), $atts));
 		$settings = get_option($this->set_op);
 		$gc_data = $this->get_google_calendar_contents($atts);
 
+ 		if(isset($html_tag) && !empty($html_tag)): 
+ 			$settings['google_calendar']['html-tag'] = wp_strip_all_tags($html_tag);
+ 			if(!isset($this->html_tags[$settings['google_calendar']['html-tag']])) $$settings['google_calendar']['html-tag'] = $this->html_tags[0];
+ 		endif;
+ 		
 		$out = ''; 
 		if($gc_data['items']): 
 			foreach($gc_data['items'] as $gc_key=>$gc_value):
-				$out .= '<' . esc_html($settings['google_calendar']['html-tag']  ? $settings['google_calendar']['html-tag'] : $this->default_html_tag) . ' class="' . $this->plugin_name . '">' . ($date_format ? esc_html(date($date_format, strtotime($gc_value['start']['dateTime']))) : '') . ' <a href="' . esc_url($gc_value['htmlLink']) . '" target="_blank">' . esc_html($gc_value['summary']) .'</a>' . '</' . esc_html($settings['google_calendar']['html-tag']  ? $settings['google_calendar']['html-tag'] : $this->default_html_tag) . '>' . "\n";
+	 			if(isset($gc_value['start']['dateTime'])):
+	 				$dateTime = $gc_value['start']['dateTime'];
+	 			else:
+	 				$dateTime = $gc_value['start']['date'];
+	 			endif;
+
+				$out .= '<' . esc_html($settings['google_calendar']['html-tag']  ? $settings['google_calendar']['html-tag'] : $this->default_html_tag) . ' class="' . $this->plugin_name . '">' . ($date_format ? esc_html(date($date_format, strtotime($dateTime))) : '') . ' <a href="' . esc_url($gc_value['htmlLink']) . '" target="_blank">' . esc_html($gc_value['summary']) .'</a>' . '</' . esc_html($settings['google_calendar']['html-tag']  ? $settings['google_calendar']['html-tag'] : $this->default_html_tag) . '>' . "\n";
 	  		endforeach;		
 		endif;
- 
+
     	return $out;
 	}
 	public function get_google_calendar_contents($atts){
@@ -86,12 +100,14 @@ class gclv{
 		if(isset($settings['google_calendar']))
 			$gc = $settings['google_calendar'];
 
- 		$g_url = esc_url($gc['api-url']) . wp_strip_all_tags($gc['id']) . '/events?key=' . wp_strip_all_tags($gc['api-key']) . '&singleEvents=true';
-
 		// Priority of the attribution value in the shortcode.
  		if(isset($start_date) && !empty($start_date)) $gc['start-date'] = wp_strip_all_tags($start_date);
  		if(isset($end_date) && !empty($end_date)) $gc['end-date'] = wp_strip_all_tags($end_date);
  		if(isset($orderbysort) && !empty($orderbysort)) $gc['orderbysort'] = wp_strip_all_tags($orderbysort);
+ 		if(isset($g_api_key) && !empty($g_api_key)) $gc['api-key'] = wp_strip_all_tags($g_api_key);
+ 		if(isset($g_id) && !empty($g_id)) $gc['id'] = wp_strip_all_tags($g_id);
+
+ 		$g_url = esc_url($gc['api-url']) . wp_strip_all_tags($gc['id']) . '/events?key=' . wp_strip_all_tags($gc['api-key']) . '&singleEvents=true';
 
 		$params = array();
 		$params[] = 'orderBy=' . wp_strip_all_tags($this->google_calendar['orderby']);
@@ -120,7 +136,11 @@ class gclv{
  	 				if($this->google_calendar['orderby'] === strtolower('updated')):
 	 		 			$s_date[] = $item['updated'];
 	 		 		else:
-	 		 			$s_date[] = $item['start']['dateTime'];
+	 		 			if(isset($item['start']['dateTime'])):
+		 		 			$s_date[] = $item['start']['dateTime'];
+		 		 		else:
+		 		 			$s_date[] = $item['start']['date'];
+						endif;
 	 		 		endif;
  	 			endforeach; 
  	 			array_multisort($s_date, SORT_DESC, $json['items']);
@@ -189,15 +209,19 @@ class gclv{
   <form method="post" action="">
      <fieldset style="border:1px solid #777777; width: 750px; padding-left: 6px;">
 		<legend><h3><?php _e('How to use it.', $this->plugin_name); ?></h3></legend>
-		<div style="overflow:noscroll; height: 250px;">
+		<div style="overflow:noscroll; height: 330px;">
 		<p><?php _e('Shortcode: ', $this->plugin_name); ?><strong><?php print '[' . $this->plugin_shortcode .']'; ?></strong> <?php _e('(Put the shortcode on a post or page.)', $this->plugin_name); ?></p>
 		<p>The following shortcode option is priority than setting values.</p>
-		<p><strong><?php print '[' . $this->plugin_shortcode .' start_date="YYYY-MM-DD/ALL" end_date="YYYY-MM-DD" date_format="Y.m.d" orderbysort="ascending/descending"]'; ?></strong></p>
+		<p><strong><?php print '[' . $this->plugin_shortcode .' start_date="YYYY-MM-DD/ALL" end_date="YYYY-MM-DD" date_format="Y.m.d" orderbysort="ascending/descending" g_id="Google Calendar ID" g_api_key="Google Calendar API Key" html_tag="li/p/dd"]'; ?></strong></p>
 				<ol>
 					<li><?php _e('start_date is the value of "Start Date" (Default value is empty (= current date)).', $this->plugin_name); ?> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?> <?php _e('If "ALL" value is setting up, start_date value is unlimited.', $this->plugin_name); ?></li>
 					<li><?php _e('end_date is the value of "End Date".', $this->plugin_name); ?> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?></li>
 					<li><?php _e('date_format is (<a href="http://php.net/manual/en/datetime.formats.date.php" target="_blank">date</a>  format is supported.)', $this->plugin_name); ?></li>
 					<li><?php _e('orderbysort can select "ascending" or descending". It behaves like ordersort by Google Calendar API v2.', $this->plugin_name); ?></li>
+					<li><?php _e('g_id is Google Calendar ID. If you use multi Google Calendar, set this value.', $this->plugin_name); ?></li>
+					<li><?php _e('g_api_key is Google Calendar API Key. If you use multi Google Calendar API Key, set this value.', $this->plugin_name); ?></li>
+					<li><?php _e('HTML tag is used by the output Google Calendar events. The tag class is "'.$this->plugin_name.'".', $this->plugin_name); ?></li>
+
 				</ol>
 		</div>
      </fieldset>
