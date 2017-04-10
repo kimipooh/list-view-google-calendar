@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 1.0
+Version: 1.1
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -66,9 +66,13 @@ class gclv{
     	    'end_date'		=> '',
     	    'date_format'	=> 'Y.m.d', 
 			'orderbysort'	=> '',			// ascending or descending.
-			'html_tag'		=> '',
 			'g_api_key'		=> '',			// Google Calendar API KEY
 			'g_id'			=> '',			// Google Calendar ID
+			'max_view'		=> '',			// Maximum number of view
+			'html_tag'		=> '',
+			'html_tag_class'	=> $this->plugin_name,		// adding a class to html tag (default: $this->plugin_name) 
+			'html_tag_date_class'	=> $this->plugin_name . "_date",		// setting up a class to date in html tag
+			'html_tag_title_class'	=> $this->plugin_name . "_title",	// setting up a class to title in html tag
 	    ), $atts));
 		$settings = get_option($this->set_op);
 		$gc_data = $this->get_google_calendar_contents($atts);
@@ -87,7 +91,15 @@ class gclv{
 	 				$dateTime = $gc_value['start']['date'];
 	 			endif;
 
-				$out .= '<' . esc_html($settings['google_calendar']['html-tag']  ? $settings['google_calendar']['html-tag'] : $this->default_html_tag) . ' class="' . $this->plugin_name . '">' . ($date_format ? esc_html(date($date_format, strtotime($dateTime))) : '') . ' <a href="' . esc_url($gc_value['htmlLink']) . '" target="_blank">' . esc_html($gc_value['summary']) .'</a>' . '</' . esc_html($settings['google_calendar']['html-tag']  ? $settings['google_calendar']['html-tag'] : $this->default_html_tag) . '>' . "\n";
+				$out .= '<' . esc_html($settings['google_calendar']['html-tag'] ? $settings['google_calendar']['html-tag'] : $this->default_html_tag);
+				$out .=  ' class="' . ($html_tag_class ? esc_attr($html_tag_class) : '') . '">';
+				$out .=  $html_tag_date_class ? '<span="' . esc_attr($html_tag_date_class) . '">' : '';
+				$out .= ' ' . $date_format ? esc_html(date($date_format, strtotime($dateTime))) : '';
+				$out .= $html_tag_date_class ? '</span>' : '';
+				$out .= ' <a';
+				$out .= $html_tag_title_class ? ' class="' . esc_attr($html_tag_title_class) . '"': '';
+				$out .= ' href="' . esc_url($gc_value['htmlLink']) . '" target="_blank">' . esc_html($gc_value['summary']) .'</a>';
+				$out .= '</' . esc_html($settings['google_calendar']['html-tag']  ? $settings['google_calendar']['html-tag'] : $this->default_html_tag) . '>' . "\n";
 	  		endforeach;		
 		endif;
 
@@ -106,6 +118,13 @@ class gclv{
  		if(isset($orderbysort) && !empty($orderbysort)) $gc['orderbysort'] = wp_strip_all_tags($orderbysort);
  		if(isset($g_api_key) && !empty($g_api_key)) $gc['api-key'] = wp_strip_all_tags($g_api_key);
  		if(isset($g_id) && !empty($g_id)) $gc['id'] = wp_strip_all_tags($g_id);
+ 		if(isset($max_view) && !empty($max_view)):
+			if((int)$max_view > 0 && (int)($max_view) <= 2500):
+ 			 $gc['maxResults'] = (int)wp_strip_all_tags($max_view);
+ 			else:
+ 			 $gc['maxResults'] = $this->default_maxResults;
+ 			endif;
+ 		endif;
 
  		$g_url = esc_url($gc['api-url']) . wp_strip_all_tags($gc['id']) . '/events?key=' . wp_strip_all_tags($gc['api-key']) . '&singleEvents=true';
 
@@ -209,10 +228,10 @@ class gclv{
   <form method="post" action="">
      <fieldset style="border:1px solid #777777; width: 750px; padding-left: 6px;">
 		<legend><h3><?php _e('How to use it.', $this->plugin_name); ?></h3></legend>
-		<div style="overflow:noscroll; height: 330px;">
+		<div style="overflow:noscroll; height: 470px;">
 		<p><?php _e('Shortcode: ', $this->plugin_name); ?><strong><?php print '[' . $this->plugin_shortcode .']'; ?></strong> <?php _e('(Put the shortcode on a post or page.)', $this->plugin_name); ?></p>
 		<p>The following shortcode option is priority than setting values.</p>
-		<p><strong><?php print '[' . $this->plugin_shortcode .' start_date="YYYY-MM-DD/ALL" end_date="YYYY-MM-DD" date_format="Y.m.d" orderbysort="ascending/descending" g_id="Google Calendar ID" g_api_key="Google Calendar API Key" html_tag="li/p/dd"]'; ?></strong></p>
+		<p><strong><?php print '[' . $this->plugin_shortcode .' start_date="YYYY-MM-DD/ALL" end_date="YYYY-MM-DD" date_format="Y.m.d" orderbysort="ascending/descending" g_id="Google Calendar ID" g_api_key="Google Calendar API Key" html_tag="li/p/dd" max_view=10 html_tag_class="" html_tag_date_class="" html_tag_title_class=""]'; ?></strong></p>
 				<ol>
 					<li><?php _e('start_date is the value of "Start Date" (Default value is empty (= current date)).', $this->plugin_name); ?> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?> <?php _e('If "ALL" value is setting up, start_date value is unlimited.', $this->plugin_name); ?></li>
 					<li><?php _e('end_date is the value of "End Date".', $this->plugin_name); ?> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?></li>
@@ -220,7 +239,11 @@ class gclv{
 					<li><?php _e('orderbysort can select "ascending" or descending". It behaves like ordersort by Google Calendar API v2.', $this->plugin_name); ?></li>
 					<li><?php _e('g_id is Google Calendar ID. If you use multi Google Calendar, set this value.', $this->plugin_name); ?></li>
 					<li><?php _e('g_api_key is Google Calendar API Key. If you use multi Google Calendar API Key, set this value.', $this->plugin_name); ?></li>
-					<li><?php _e('HTML tag is used by the output Google Calendar events. The tag class is "'.$this->plugin_name.'".', $this->plugin_name); ?></li>
+					<li><?php _e('max_view is the maximum number of view. Default is 10 (same as maxResults value in Google Calendar API Settings)', $this->plugin_name); ?></li>
+					<li><?php _e('html_tag is used by the output Google Calendar events.', $this->plugin_name); ?></li>
+					<li><?php _e(esc_html('html_tag_class is html_tag class. Default is ' . $this->plugin_name .'(<html_tag class="' . $this->plugin_name .'">***</html_tag>)'), $this->plugin_name); ?></li>
+					<li><?php _e(esc_html('html_tag_date_class is html_tag date class. Default is ' . $this->plugin_name . '_date (<span class="' . $this->plugin_name . '_date">Date</span>)'), $this->plugin_name); ?></li>
+					<li><?php _e(esc_html('html_tag_title_class is html_tag title class. Default is '. $this->plugin_name .'_title (<a class="' . $this->plugin_name . '_title" href="***">Title</a>)'), $this->plugin_name); ?></li>
 
 				</ol>
 		</div>
