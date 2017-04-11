@@ -4,8 +4,9 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 4.7.3
-Stable tag: 1.1
-License: GPL v2
+Stable tag: 1.2
+License: GPL v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
  
@@ -13,10 +14,14 @@ The plugin is to create a shortcode for displaying the list view of a public Goo
 
 The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
 
-Shortcode: [gc_list_view] (Put the shortcode on a post or page.)
+= Document =
 
-About the detail information, Please see "Google Calendar List View Settings" in Setting menu or https://kitaney-wordpress.blogspot.jp/2017/04/google-calendar-list-view-google.html (in Japanese).
+Please see "Google Calendar List View Settings" in Setting menu or [Japanese document](https://kitaney-wordpress.blogspot.jp/2017/04/google-calendar-list-view-google.html)
 
+== Installation ==
+
+1. Upload the plugin folder to /wp-content/plugins/ directory.
+2. Activate the plugin in your WordPress admin panel.
 
 == Frequently Asked Questions ==
 = How to get past events. =
@@ -32,7 +37,6 @@ Yes. You can set Google Calendar ID and API Key in the shortcode.
 = How to remove the settings =
 Deactivate the plugin.
 
-
 == Screenshots ==
 1. List View of a public Google Calendar
 2. How to use the Shortcode
@@ -40,17 +44,25 @@ Deactivate the plugin.
 4. How to use it
 5. Goolge Calendar API Settings
 6. General Settngs
+7. Feature Expansion & Other notice
 
 == Changelog ==
 
+= 1.2 =
+
+* added two hooks of "lvgc_output_data" and "lvgc_gc_data".
+"lvgc_output_data" hook can handle for the output data. "lvgc_gc_data" hook can handled for getting Google Calendar data.
+
+* Fixed timezone issue by using current_time and get_date_from_gmt function instead of date function.
+
+* Added to a class "list-view-google-calendar-holding" to html tag for a holding event.
+
 = 1.1 =
+
 * added 4 shortcode options (max_view, html_tag_class, html_tag_date_class, html_tag_title_class)
 
 = 1.0 =
+
 * First Released.
 
-== Upgrade Notice ==
-
-= 1.0 =
-* First Released.
 

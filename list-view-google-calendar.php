@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 1.1
+Version: 1.2
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -82,6 +82,8 @@ class gclv{
  			if(!isset($this->html_tags[$settings['google_calendar']['html-tag']])) $$settings['google_calendar']['html-tag'] = $this->html_tags[0];
  		endif;
  		
+ 		$gc_data = apply_filters('lvgc_gc_data', $gc_data);
+ 		
 		$out = ''; 
 		if($gc_data['items']): 
 			foreach($gc_data['items'] as $gc_key=>$gc_value):
@@ -90,11 +92,22 @@ class gclv{
 	 			else:
 	 				$dateTime = $gc_value['start']['date'];
 	 			endif;
+	 			if(isset($gc_value['end']['dateTime'])):
+	 				$end_dateTime = $gc_value['end']['dateTime'];
+	 			else:
+	 				$end_dateTime = $gc_value['end']['date'];
+	 			endif;
+	 			
+	 			$start_date_num = get_date_from_gmt($dateTime, "Ymd");
+	 			$end_date_num = get_date_from_gmt($end_dateTime, "Ymd");
+	 			$today_date_num = current_time("Ymd");
+	 			$holding_flag = false;
+	 			if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 
 				$out .= '<' . esc_html($settings['google_calendar']['html-tag'] ? $settings['google_calendar']['html-tag'] : $this->default_html_tag);
-				$out .=  ' class="' . ($html_tag_class ? esc_attr($html_tag_class) : '') . '">';
+				$out .=  ' class="' . ($html_tag_class ? esc_attr($html_tag_class) : '') . ($holding_flag ? esc_attr(' ' . $this->plugin_name . '_holding') : '') . '">';
 				$out .=  $html_tag_date_class ? '<span="' . esc_attr($html_tag_date_class) . '">' : '';
-				$out .= ' ' . $date_format ? esc_html(date($date_format, strtotime($dateTime))) : '';
+				$out .= ' ' . $date_format ? esc_html(get_date_from_gmt($dateTime, $date_format)) : '';
 				$out .= $html_tag_date_class ? '</span>' : '';
 				$out .= ' <a';
 				$out .= $html_tag_title_class ? ' class="' . esc_attr($html_tag_title_class) . '"': '';
@@ -103,7 +116,7 @@ class gclv{
 	  		endforeach;		
 		endif;
 
-    	return $out;
+    	return apply_filters( 'lvgc_output_data', $out );
 	}
 	public function get_google_calendar_contents($atts){
 		if($atts) extract($atts);
@@ -133,13 +146,13 @@ class gclv{
 		$params[] = 'maxResults=' . (int)(isset($gc['maxResults']) ? wp_strip_all_tags($gc['maxResults']) : $this->default_maxResults);
 		if(!empty($gc['start-date'])):
 			if(strtolower($gc['start-date']) !== 'all'):
-				$params[] = 'timeMin='.urlencode(date('c', strtotime($gc['start-date'])));
+				$params[] = 'timeMin='.urlencode(get_date_from_gmt(strtotime($gc['start-date']), 'c'));
 			endif;
 		else:
-			$params[] = 'timeMin='.urlencode(date('c'));			
+			$params[] = 'timeMin='.urlencode(date_i18n('c'));			
 		endif;
 		if(!empty($gc['end-date']))
-			$params[] = 'timeMax='.urlencode(date('c', strtotime($gc['end-date'])));
+			$params[] = 'timeMax='.urlencode(get_date_from_gmt(strtotime($gc['end-date']), 'c'));
 
 		$url = $g_url .'&'.implode('&', $params);
 
@@ -244,7 +257,6 @@ class gclv{
 					<li><?php _e(esc_html('html_tag_class is html_tag class. Default is ' . $this->plugin_name .'(<html_tag class="' . $this->plugin_name .'">***</html_tag>)'), $this->plugin_name); ?></li>
 					<li><?php _e(esc_html('html_tag_date_class is html_tag date class. Default is ' . $this->plugin_name . '_date (<span class="' . $this->plugin_name . '_date">Date</span>)'), $this->plugin_name); ?></li>
 					<li><?php _e(esc_html('html_tag_title_class is html_tag title class. Default is '. $this->plugin_name .'_title (<a class="' . $this->plugin_name . '_title" href="***">Title</a>)'), $this->plugin_name); ?></li>
-
 				</ol>
 		</div>
      </fieldset>
@@ -297,7 +309,20 @@ class gclv{
 		</div>
      </fieldset>
      <br/>
-   
+     <fieldset style="border:1px solid #777777; width: 750px; padding-left: 6px;">
+		<legend><h3><?php _e('Feature Expansion &amp; Other notice', $this->plugin_name); ?></h3></legend>
+		<div style="overflow:noscroll; height: 140px;">
+		<br/>
+		<?php _e('The plguin is the following hooks', $this->plugin_name); ?>
+		<ol>
+			<li><strong>lvgc_output_data</strong> <?php _e('can handle for the output data.', $this->plugin_name); ?></li>
+			<li><strong>lvgc_gc_data</strong> <?php _e('can handled for getting Google Calendar data.', $this->plugin_name); ?></li>
+		</ol>
+		<strong><?php _e('If you emphasize a holding event, setting up ' . $this->plugin_name . '_holding class', $this->plugin_name); ?></strong></li>
+
+		</div>
+     </fieldset>
+      
    </form>
 <?php 
 		if($google_calendar_flag):
