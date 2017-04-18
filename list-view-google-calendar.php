@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 1.3
+Version: 1.4
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -50,7 +50,7 @@ class gclv{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 130;
+		$this->settings['version'] = 140;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -80,9 +80,11 @@ class gclv{
 
  		if(isset($html_tag) && !empty($html_tag)): 
  			$settings['google_calendar']['html-tag'] = wp_strip_all_tags($html_tag);
- 			if(!isset($this->html_tags[$settings['google_calendar']['html-tag']])) $$settings['google_calendar']['html-tag'] = $this->html_tags[$default_html_tag];
+ 			if(!isset($this->html_tags[$settings['google_calendar']['html-tag']])) $settings['google_calendar']['html-tag'] = $this->html_tags[$default_html_tag];
  		endif;
- 		
+ 		$atts['html_tag'] = $settings['google_calendar']['html-tag'] ? $settings['google_calendar']['html-tag'] : $this->default_html_tag;
+		$html_tag = $atts['html_tag'];
+		
  		$gc_data = apply_filters('lvgc_gc_data', $gc_data, $atts);
  		
 		$out = ''; 
@@ -100,20 +102,35 @@ class gclv{
 	 			endif;
 	 			
 	 			$start_date_num = get_date_from_gmt($dateTime, "Ymd");
+	 			$start_date_value = get_date_from_gmt($dateTime, $date_format);
 	 			$end_date_num = get_date_from_gmt($end_dateTime, "Ymd");
 	 			$today_date_num = current_time("Ymd");
 	 			$holding_flag = false;
 	 			if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
+	 			$gc_link = esc_url($gc_value['htmlLink']);
+	 			$gc_title = esc_html($gc_value['summary']);
 
-				$out .= '<' . esc_html($settings['google_calendar']['html-tag'] ? $settings['google_calendar']['html-tag'] : $this->default_html_tag);
+	 			// for a hook "lvgc_output_data".
+	 			$out_atts = array(
+	 				'start_date_num'	=> $start_date_num,
+	 				'end_date_num'		=> $end_date_num,
+	 				'today_date_num'	=> $today_date_num,
+	 				'holding_flag'		=> $holding_flag,
+	 				'gc_link'			=> $gc_link,
+	 				'gc_title'			=> $gc_title, 
+	 			);
+
+				$out .= '<' . esc_html($html_tag);
 				$out .=  ' class="' . ($html_tag_class ? esc_attr($html_tag_class) : '') . ($holding_flag ? esc_attr(' ' . $this->plugin_name . '_holding') : '') . '">';
 				$out .=  $html_tag_date_class ? '<span="' . esc_attr($html_tag_date_class) . '">' : '';
-				$out .= ' ' . $date_format ? esc_html(get_date_from_gmt($dateTime, $date_format)) : '';
+				$out .= ' ' . $date_format ? esc_html($start_date_value) : '';
 				$out .= $html_tag_date_class ? '</span>' : '';
 				$out .= ' <a';
 				$out .= $html_tag_title_class ? ' class="' . esc_attr($html_tag_title_class) . '"': '';
-				$out .= ' href="' . esc_url($gc_value['htmlLink']) . '" target="_blank">' . esc_html($gc_value['summary']) .'</a>';
-				$out .= '</' . esc_html($settings['google_calendar']['html-tag']  ? $settings['google_calendar']['html-tag'] : $this->default_html_tag) . '>' . "\n";
+				$out .= ' href="' . esc_url($gc_link) . '" target="_blank">' . esc_html($gc_title) .'</a>';
+				$out .= '</' . esc_html($html_tag) . '>' . "\n";
+				
+				$out = apply_filters( 'lvgc_each_output_data', $out, $atts, $out_atts );
 	  		endforeach;		
 		endif;
 
@@ -313,12 +330,13 @@ class gclv{
      <br/>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
 		<legend><h3><?php _e('Feature Expansion &amp; Other notice', $this->plugin_name); ?></h3></legend>
-		<div style="overflow:noscroll; height: 160px;">
+		<div style="overflow:noscroll; height: 200px;">
 		<br/>
 		<?php _e('The plugin is the following hooks', $this->plugin_name); ?>
 		<ol>
-			<li><strong>lvgc_output_data</strong> <?php _e('can handle for the output data.', $this->plugin_name); ?></li>
-			<li><strong>lvgc_gc_data</strong> <?php _e('can handled for getting Google Calendar data.', $this->plugin_name); ?></li>
+			<li><strong>lvgc_output_data</strong> <?php _e('can handle the output data.', $this->plugin_name); ?></li>
+			<li><strong>lvgc_gc_data</strong> <?php _e('can handled gotten Google Calendar data.', $this->plugin_name); ?></li>
+			<li><strong>lvgc_each_output_data</strong> <?php _e('can handled each output data.', $this->plugin_name); ?></li>
 		</ol>
 		<strong><?php _e('If you emphasize a holding event, setting up ' . $this->plugin_name . '_holding class', $this->plugin_name); ?></strong><br/>
 		<?php _e('If you want to customize the value using a hook each a shortcode, id can use a unique key.', $this->plugin_name); ?></li>
