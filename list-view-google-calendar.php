@@ -240,9 +240,9 @@ class gclv{
   <h2><?php _e($this->plugin_title . ' Settings', $this->plugin_name); ?></h2>
   
   <form method="post" action="">
-     <fieldset style="border:1px solid #777777; width: 750px; padding-left: 6px;">
+     <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
 		<legend><h3><?php _e('How to use it.', $this->plugin_name); ?></h3></legend>
-		<div style="overflow:noscroll; height: 520px;">
+		<div style="overflow:noscroll; height: 550px;">
 		<p><?php _e('Shortcode: ', $this->plugin_name); ?><strong><?php print '[' . $this->plugin_shortcode .']'; ?></strong> <?php _e('(Put the shortcode on a post or page.)', $this->plugin_name); ?></p>
 		<p>The following shortcode option is priority than setting values.</p>
 		<p><strong><?php print '[' . $this->plugin_shortcode .' start_date="YYYY-MM-DD/ALL" end_date="YYYY-MM-DD" date_format="Y.m.d" orderbysort="ascending/descending" g_id="Google Calendar ID" g_api_key="Google Calendar API Key" html_tag="li/p/dd" max_view=10 html_tag_class="" html_tag_date_class="" html_tag_title_class="" id=""]'; ?></strong></p>
@@ -263,7 +263,7 @@ class gclv{
 		</div>
      </fieldset>
 	 <br/>
-     <fieldset style="border:1px solid #777777; width: 750px; padding-left: 6px;">
+     <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
 		<legend><h3><?php _e('Google Calendar API Settings', $this->plugin_name); ?></h3></legend>
 		<div style="overflow:noscroll; height: 400px;">
 		<br/>
@@ -288,7 +288,7 @@ class gclv{
 		</div>
      </fieldset>
      <br/>
-     <fieldset style="border:1px solid #777777; width: 750px; padding-left: 6px;">
+     <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
 		<legend><h3><?php _e('General Settings', $this->plugin_name); ?></h3></legend>
 		<div style="overflow:noscroll; height: 180px;">
 		<br/>
@@ -311,7 +311,7 @@ class gclv{
 		</div>
      </fieldset>
      <br/>
-     <fieldset style="border:1px solid #777777; width: 750px; padding-left: 6px;">
+     <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
 		<legend><h3><?php _e('Feature Expansion &amp; Other notice', $this->plugin_name); ?></h3></legend>
 		<div style="overflow:noscroll; height: 160px;">
 		<br/>
