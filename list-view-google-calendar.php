@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 1.2
+Version: 1.3
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -50,7 +50,7 @@ class gclv{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 100;
+		$this->settings['version'] = 130;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -62,6 +62,7 @@ class gclv{
 	}
 	public function shortcodes($atts){  
 		extract($atts = shortcode_atts(array(
+			'id'			=> '',
     	    'start_date' 	=> '',
     	    'end_date'		=> '',
     	    'date_format'	=> 'Y.m.d', 
@@ -79,10 +80,10 @@ class gclv{
 
  		if(isset($html_tag) && !empty($html_tag)): 
  			$settings['google_calendar']['html-tag'] = wp_strip_all_tags($html_tag);
- 			if(!isset($this->html_tags[$settings['google_calendar']['html-tag']])) $$settings['google_calendar']['html-tag'] = $this->html_tags[0];
+ 			if(!isset($this->html_tags[$settings['google_calendar']['html-tag']])) $$settings['google_calendar']['html-tag'] = $this->html_tags[$default_html_tag];
  		endif;
  		
- 		$gc_data = apply_filters('lvgc_gc_data', $gc_data);
+ 		$gc_data = apply_filters('lvgc_gc_data', $gc_data, $atts);
  		
 		$out = ''; 
 		if($gc_data['items']): 
@@ -116,7 +117,7 @@ class gclv{
 	  		endforeach;		
 		endif;
 
-    	return apply_filters( 'lvgc_output_data', $out );
+    	return apply_filters( 'lvgc_output_data', $out, $atts );
 	}
 	public function get_google_calendar_contents($atts){
 		if($atts) extract($atts);
@@ -241,22 +242,23 @@ class gclv{
   <form method="post" action="">
      <fieldset style="border:1px solid #777777; width: 750px; padding-left: 6px;">
 		<legend><h3><?php _e('How to use it.', $this->plugin_name); ?></h3></legend>
-		<div style="overflow:noscroll; height: 470px;">
+		<div style="overflow:noscroll; height: 520px;">
 		<p><?php _e('Shortcode: ', $this->plugin_name); ?><strong><?php print '[' . $this->plugin_shortcode .']'; ?></strong> <?php _e('(Put the shortcode on a post or page.)', $this->plugin_name); ?></p>
 		<p>The following shortcode option is priority than setting values.</p>
-		<p><strong><?php print '[' . $this->plugin_shortcode .' start_date="YYYY-MM-DD/ALL" end_date="YYYY-MM-DD" date_format="Y.m.d" orderbysort="ascending/descending" g_id="Google Calendar ID" g_api_key="Google Calendar API Key" html_tag="li/p/dd" max_view=10 html_tag_class="" html_tag_date_class="" html_tag_title_class=""]'; ?></strong></p>
+		<p><strong><?php print '[' . $this->plugin_shortcode .' start_date="YYYY-MM-DD/ALL" end_date="YYYY-MM-DD" date_format="Y.m.d" orderbysort="ascending/descending" g_id="Google Calendar ID" g_api_key="Google Calendar API Key" html_tag="li/p/dd" max_view=10 html_tag_class="" html_tag_date_class="" html_tag_title_class="" id=""]'; ?></strong></p>
 				<ol>
-					<li><?php _e('start_date is the value of "Start Date" (Default value is empty (= current date)).', $this->plugin_name); ?> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?> <?php _e('If "ALL" value is setting up, start_date value is unlimited.', $this->plugin_name); ?></li>
+					<li><?php _e('start_date is the value of "Start Date" (Default value is empty (= current date)).', $this->plugin_name); ?> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?> <?php _e('If "ALL" value is setting up, start_date value become to be unlimited.', $this->plugin_name); ?></li>
 					<li><?php _e('end_date is the value of "End Date".', $this->plugin_name); ?> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?></li>
-					<li><?php _e('date_format is (<a href="http://php.net/manual/en/datetime.formats.date.php" target="_blank">date</a>  format is supported.)', $this->plugin_name); ?></li>
+					<li><?php _e('date_format supports<a href="http://php.net/manual/en/datetime.formats.date.php" target="_blank">date</a>  format.)', $this->plugin_name); ?></li>
 					<li><?php _e('orderbysort can select "ascending" or descending". It behaves like ordersort by Google Calendar API v2.', $this->plugin_name); ?></li>
 					<li><?php _e('g_id is Google Calendar ID. If you use multi Google Calendar, set this value.', $this->plugin_name); ?></li>
 					<li><?php _e('g_api_key is Google Calendar API Key. If you use multi Google Calendar API Key, set this value.', $this->plugin_name); ?></li>
 					<li><?php _e('max_view is the maximum number of view. Default is 10 (same as maxResults value in Google Calendar API Settings)', $this->plugin_name); ?></li>
-					<li><?php _e('html_tag is used by the output Google Calendar events.', $this->plugin_name); ?></li>
+					<li><?php _e('html_tag is HTML tag for the output Google Calendar events.', $this->plugin_name); ?></li>
 					<li><?php _e(esc_html('html_tag_class is html_tag class. Default is ' . $this->plugin_name .'(<html_tag class="' . $this->plugin_name .'">***</html_tag>)'), $this->plugin_name); ?></li>
 					<li><?php _e(esc_html('html_tag_date_class is html_tag date class. Default is ' . $this->plugin_name . '_date (<span class="' . $this->plugin_name . '_date">Date</span>)'), $this->plugin_name); ?></li>
 					<li><?php _e(esc_html('html_tag_title_class is html_tag title class. Default is '. $this->plugin_name .'_title (<a class="' . $this->plugin_name . '_title" href="***">Title</a>)'), $this->plugin_name); ?></li>
+					<li><?php _e('id is an unique key for the plugin hooks. If you want to customize the value using a hook each a shortcode, id can use a unique key.', $this->plugin_name); ?></li>
 				</ol>
 		</div>
      </fieldset>
@@ -311,14 +313,16 @@ class gclv{
      <br/>
      <fieldset style="border:1px solid #777777; width: 750px; padding-left: 6px;">
 		<legend><h3><?php _e('Feature Expansion &amp; Other notice', $this->plugin_name); ?></h3></legend>
-		<div style="overflow:noscroll; height: 140px;">
+		<div style="overflow:noscroll; height: 160px;">
 		<br/>
-		<?php _e('The plguin is the following hooks', $this->plugin_name); ?>
+		<?php _e('The plugin is the following hooks', $this->plugin_name); ?>
 		<ol>
 			<li><strong>lvgc_output_data</strong> <?php _e('can handle for the output data.', $this->plugin_name); ?></li>
 			<li><strong>lvgc_gc_data</strong> <?php _e('can handled for getting Google Calendar data.', $this->plugin_name); ?></li>
 		</ol>
-		<strong><?php _e('If you emphasize a holding event, setting up ' . $this->plugin_name . '_holding class', $this->plugin_name); ?></strong></li>
+		<strong><?php _e('If you emphasize a holding event, setting up ' . $this->plugin_name . '_holding class', $this->plugin_name); ?></strong><br/>
+		<?php _e('If you want to customize the value using a hook each a shortcode, id can use a unique key.', $this->plugin_name); ?></li>
+
 
 		</div>
      </fieldset>
