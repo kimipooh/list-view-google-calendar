@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 4.7.3
-Stable tag: 1.41
+Stable tag: 1.42
 License: GPL v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,10 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 1.42 =
+
+* fixed. "lvgc_each_output_data" hook. 
 
 = 1.41 =
 
