@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 1.4
+Version: 1.41
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -109,6 +109,7 @@ class gclv{
 	 			if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 	 			$gc_link = esc_url($gc_value['htmlLink']);
 	 			$gc_title = esc_html($gc_value['summary']);
+				$plugin_name = $this->plugin_name;
 
 	 			// for a hook "lvgc_output_data".
 	 			$out_atts = array(
@@ -118,19 +119,20 @@ class gclv{
 	 				'holding_flag'		=> $holding_flag,
 	 				'gc_link'			=> $gc_link,
 	 				'gc_title'			=> $gc_title, 
+	 				'plugin_name'		=> $plugin_name,
 	 			);
 
-				$out .= '<' . esc_html($html_tag);
-				$out .=  ' class="' . ($html_tag_class ? esc_attr($html_tag_class) : '') . ($holding_flag ? esc_attr(' ' . $this->plugin_name . '_holding') : '') . '">';
-				$out .=  $html_tag_date_class ? '<span="' . esc_attr($html_tag_date_class) . '">' : '';
-				$out .= ' ' . $date_format ? esc_html($start_date_value) : '';
-				$out .= $html_tag_date_class ? '</span>' : '';
-				$out .= ' <a';
-				$out .= $html_tag_title_class ? ' class="' . esc_attr($html_tag_title_class) . '"': '';
-				$out .= ' href="' . esc_url($gc_link) . '" target="_blank">' . esc_html($gc_title) .'</a>';
-				$out .= '</' . esc_html($html_tag) . '>' . "\n";
+				$out_temp = '<' . esc_html($html_tag);
+				$out_temp .=  ' class="' . ($html_tag_class ? esc_attr($html_tag_class) : '') . ($holding_flag ? esc_attr(' ' . $plugin_name . '_holding') : '') . '">';
+				$out_temp .=  $html_tag_date_class ? '<span="' . esc_attr($html_tag_date_class) . '">' : '';
+				$out_temp .= ' ' . $date_format ? esc_html($start_date_value) : '';
+				$out_temp .= $html_tag_date_class ? '</span>' : '';
+				$out_temp .= ' <a';
+				$out_temp .= $html_tag_title_class ? ' class="' . esc_attr($html_tag_title_class) . '"': '';
+				$out_temp .= ' href="' . esc_url($gc_link) . '" target="_blank">' . esc_html($gc_title) .'</a>';
+				$out_temp .= '</' . esc_html($html_tag) . '>' . "\n";
 				
-				$out = apply_filters( 'lvgc_each_output_data', $out, $atts, $out_atts );
+				$out .= apply_filters( 'lvgc_each_output_data', $out_temp, $atts, $out_atts );
 	  		endforeach;		
 		endif;
 
