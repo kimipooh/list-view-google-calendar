@@ -4,8 +4,8 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 4.8
-Stable tag: 1.43
-License: GPL v2 or later
+Stable tag: 1.5
+License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
@@ -16,7 +16,7 @@ The plugin is to create a shortcode for displaying the list view of a public Goo
 
 = Document =
 
-Please see "Google Calendar List View Settings" in Setting menu or [Japanese document](https://kitaney-wordpress.blogspot.jp/2017/04/google-calendar-list-view-google.html)
+Please see the documentation in detail in https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view (Japanese is https://info.cseas.kyoto-u.ac.jp/links-ja/plugin-ja/wordpress-dev-info/google-calendar-list-view)
 
 == Installation ==
 
@@ -47,6 +47,10 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 1.5 =
+* Fixed the translation issue.
+* Fixed the documentation.
 
 = 1.43 =
 * Tested up WordPress 4.8 and PHP 7.1.
