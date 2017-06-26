@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 1.51
+Version: 2.0
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -60,7 +60,8 @@ class gclv{
 		// Remove Save data.
 		delete_option($this->set_op);
 	}
-	public function shortcodes($atts){  
+	public function shortcodes($atts){
+		$atts = $this->security_check_array($atts);
 		extract($atts = shortcode_atts(array(
 			'id'			=> '',
     	    'start_date' 	=> '',
@@ -74,9 +75,13 @@ class gclv{
 			'html_tag_class'	=> $this->plugin_name,		// adding a class to html tag (default: $this->plugin_name) 
 			'html_tag_date_class'	=> $this->plugin_name . "_date",		// setting up a class to date in html tag
 			'html_tag_title_class'	=> $this->plugin_name . "_title",	// setting up a class to title in html tag
+			'hook_secret_key' => '',  // If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
 	    ), $atts));
 		$settings = get_option($this->set_op);
 		$gc_data = $this->get_google_calendar_contents($atts);
+
+ 		// Security check for the hook (clean up ALL html tag).
+ 		$gc_data = $this->security_check_array($gc_data);
 
  		if(isset($html_tag) && !empty($html_tag)): 
  			$settings['google_calendar']['html-tag'] = wp_strip_all_tags($html_tag);
@@ -85,7 +90,8 @@ class gclv{
  		$atts['html_tag'] = $settings['google_calendar']['html-tag'] ? $settings['google_calendar']['html-tag'] : $this->default_html_tag;
 		$html_tag = $atts['html_tag'];
 		
- 		$gc_data = apply_filters('lvgc_gc_data', $gc_data, $atts);
+		// Remove security reason.
+ 		//$gc_data = apply_filters('lvgc_gc_data', $gc_data, $atts);
  		
 		$out = ''; 
 		if($gc_data['items']): 
@@ -110,6 +116,7 @@ class gclv{
 	 			$gc_link = esc_url($gc_value['htmlLink']);
 	 			$gc_title = esc_html($gc_value['summary']);
 				$plugin_name = $this->plugin_name;
+				$html_tag_class_c = $holding_flag ? $html_tag_class . '_holding' : $html_tag_class; 
 
 	 			// for a hook "lvgc_output_data".
 	 			$out_atts = array(
@@ -121,23 +128,45 @@ class gclv{
 	 				'gc_link'			=> $gc_link,
 	 				'gc_title'			=> $gc_title, 
 	 				'plugin_name'		=> $plugin_name,
+	 				'html_tag_class_c'	=> $html_tag_class_c,
+	 				'id'				=> $id,
 	 			);
 
-				$out_temp = '<' . esc_html($html_tag);
-				$out_temp .=  ' class="' . ($html_tag_class ? esc_attr($html_tag_class) : '') . ($holding_flag ? esc_attr(' ' . $plugin_name . '_holding') : '') . '">';
-				$out_temp .=  $html_tag_date_class ? '<span="' . esc_attr($html_tag_date_class) . '">' : '';
-				$out_temp .= ' ' . $date_format ? esc_html($start_date_value) : '';
-				$out_temp .= $html_tag_date_class ? '</span>' : '';
-				$out_temp .= ' <a';
-				$out_temp .= $html_tag_title_class ? ' class="' . esc_attr($html_tag_title_class) . '"': '';
-				$out_temp .= ' href="' . esc_url($gc_link) . '" target="_blank">' . esc_html($gc_title) .'</a>';
-				$out_temp .= '</' . esc_html($html_tag) . '>' . "\n";
-				
-				$out .= apply_filters( 'lvgc_each_output_data', $out_temp, $atts, $out_atts );
-	  		endforeach;		
+				$out_temp = '';
+				if(!empty($html_tag) && file_exists (dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php')):
+					include(dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php');
+				else:
+					$out_temp = <<< ___EOF___
+ <li class='$html_tag_class_c'>$start_date_value <a href='$gc_link'>$gc_title</a></li>
+___EOF___;
+				endif;
+				if(!empty($hook_secret_key)):
+					$out_t = wp_kses_post(apply_filters( 'lvgc_each_output_data', $out_temp, $out_atts ));
+					if(isset($out_t['hook_secret_key']) && $hook_secret_key === $out_t['hook_secret_key']):
+						$out .= $out_t['data'];
+					else:
+						$out .= $out_temp;
+					endif;
+				else:
+					$out .= $out_temp;
+					
+				endif;
+	  		endforeach;
 		endif;
 
-    	return apply_filters( 'lvgc_output_data', $out, $atts );
+		return $out;
+	}
+	public function security_check_array($array){
+		if (empty($array)) $array;
+		if(is_array($array)):
+				foreach($array as $k => $v):
+					$array[$k] = $this->security_check_array($v);
+				endforeach;
+		else:
+			$array = esc_html(wp_strip_all_tags($array)); 
+		endif;
+		
+		return $array;
 	}
 	public function get_google_calendar_contents($atts){
 		if($atts) extract($atts);
@@ -203,7 +232,7 @@ class gclv{
 		return $json;
 	}
 	public function add_to_settings_menu(){
-		add_options_page(sprintf(__('%s Settings', $this->plugin_name), $this->plugin_name), sprintf(__('%s Settings', $this->plugin_name), $this->plugin_name), 'manage_options', __FILE__,array(&$this,'admin_settings_page'));
+		add_options_page(sprintf(__('%s Settings', $this->plugin_title), $this->plugin_title), sprintf(__('%s Settings', $this->plugin_title), $this->plugin_title), 'manage_options', __FILE__,array(&$this,'admin_settings_page'));
 	}
 	
 	// Processing Setting menu for the plugin.
@@ -301,7 +330,7 @@ class gclv{
 			<tr><td><strong>1. <?php _e('Order by Sort: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-orderbysort" type="radio" value="ascending" <?php if(strtolower($this->google_calendar['orderbysort']) !== 'descending') print 'checked';?>/>Ascending <input name="google-calendar-orderbysort" type="radio" value="descending" <?php if(strtolower($this->google_calendar['orderbysort']) === 'descending') print 'checked';?>/>Descending</td></tr>
 			<tr><td><strong>2. <?php _e('HTML tag: ', $this->plugin_name); ?></strong></td><td>
 			<?php foreach($this->html_tags as $html_tag): ?>
-			<input name="google-calendar-html-tag" type="radio" value="<?php print esc_attr($html_tag); ?>" <?php if($this->google_calendar['html-tag'] === $html_tag) print 'checked'; else if(empty($this->google_calendar['html-tag']) && $this->default_html_tag === $html_tag) print 'checked'; ?>/><?php print esc_html('<' . $html_tag . '>');?> 
+			<input name="google-calendar-html-tag" type="radio" value="<?php print esc_attr($html_tag); ?>" <?php if($this->google_calendar['html-tag'] === $html_tag) print 'checked'; elseif(empty($this->google_calendar['html-tag']) && $this->default_html_tag === $html_tag) print 'checked'; ?>/><?php print esc_html('<' . $html_tag . '>');?> 
 			<?php endforeach; ?></td></tr>
 
 			<tr><td colspan="2">
@@ -322,13 +351,14 @@ class gclv{
 		<br/>
 		<?php _e('The plugin is the following hooks', $this->plugin_name); ?>
 		<ol>
-			<li><strong>lvgc_output_data</strong> <?php _e('can handle the output data.', $this->plugin_name); ?></li>
-			<li><strong>lvgc_gc_data</strong> <?php _e('can handled gotten Google Calendar data.', $this->plugin_name); ?></li>
 			<li><strong>lvgc_each_output_data</strong> <?php _e('can handled each output data.', $this->plugin_name); ?></li>
 		</ol>
-		<strong><?php printf(__('If you emphasize a holding event, setting up %s class', $this->plugin_name), $this->plugin_name.'_holding'); ?></strong><br/>
-		<?php _e('If you want to customize the value using a hook each a shortcode, id can use a unique key.', $this->plugin_name); ?></li>
 
+		<ul>
+			<li><?php _e('If you use above hooks, you must set "hook_secret_key" option in the shortcode. And you need to return "hook_secrey_key" value in the hook. Please see the <a href="https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view" target="_blank">document</a>.', $this->plugin_name); ?></li>
+			<li><?php printf(__('If you emphasize a holding event, set class="%s" in the html tag.', $this->plugin_name), $this->plugin_name.'_holding'); ?></li>
+			<li><?php _e('If you want to customize the value using a hook each a shortcode, id can use a unique key.', $this->plugin_name); ?></li>
+		</ul>
 
 		</div>
      </fieldset>
