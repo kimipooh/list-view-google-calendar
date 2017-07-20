@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 2.0
+Version: 2.1
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -50,7 +50,7 @@ class gclv{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 151;
+		$this->settings['version'] = 201;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -76,10 +76,12 @@ class gclv{
 			'html_tag_date_class'	=> $this->plugin_name . "_date",		// setting up a class to date in html tag
 			'html_tag_title_class'	=> $this->plugin_name . "_title",	// setting up a class to title in html tag
 			'hook_secret_key' => '',  // If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
-	    ), $atts));
+			'lang'			=> '', // List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1 
+		), $atts));
 		$settings = get_option($this->set_op);
 		$gc_data = $this->get_google_calendar_contents($atts);
-
+		// get lang data.
+		$gc_data = $this->get_select_lang_data($gc_data, $atts);
  		// Security check for the hook (clean up ALL html tag).
  		$gc_data = $this->security_check_array($gc_data);
 
@@ -92,8 +94,8 @@ class gclv{
 		
 		// Remove security reason.
  		//$gc_data = apply_filters('lvgc_gc_data', $gc_data, $atts);
- 		
 		$out = ''; 
+		$match = array();
 		if($gc_data['items']): 
 			foreach($gc_data['items'] as $gc_key=>$gc_value):
 	 			if(isset($gc_value['start']['dateTime'])):
@@ -130,6 +132,7 @@ class gclv{
 	 				'plugin_name'		=> $plugin_name,
 	 				'html_tag_class_c'	=> $html_tag_class_c,
 	 				'id'				=> $id,
+	 				'lang'				=> $lang,
 	 			);
 
 				$out_temp = '';
@@ -156,8 +159,31 @@ ___EOF___;
 
 		return $out;
 	}
+	public function get_select_lang_data($gc_data, $atts){
+		if (empty($gc_data)) return $gc_data;
+		if($atts) extract($atts);
+
+		if($gc_data['items']): 
+			foreach($gc_data['items'] as $gc_key=>$gc_value):
+				if(!empty($lang)):
+					if(isset($gc_value['description'])):
+						if(preg_match('/#lang(\s+)(\w+)/', $gc_value['description'], $match)):
+							if(isset($match[2]) && $match[2] !== $lang):
+								unset($gc_data['items'][$gc_key]); var_dump("aa");
+								continue;
+							endif;
+						else:
+								unset($gc_data['items'][$gc_key]); var_dump("aa");
+								continue;							 
+						endif;
+					endif;
+				endif; 
+			endforeach;
+		endif;
+		return $gc_data;
+	}
 	public function security_check_array($array){
-		if (empty($array)) $array;
+		if (empty($array)) return $array;
 		if(is_array($array)):
 				foreach($array as $k => $v):
 					$array[$k] = $this->security_check_array($v);
@@ -171,7 +197,7 @@ ___EOF___;
 	public function get_google_calendar_contents($atts){
 		if($atts) extract($atts);
 		$settings = get_option($this->set_op);
-		$gc = '';
+		$gc = array();
 		if(isset($settings['google_calendar']))
 			$gc = $settings['google_calendar'];
 
@@ -188,6 +214,7 @@ ___EOF___;
  			 $gc['maxResults'] = $this->default_maxResults;
  			endif;
  		endif;
+ 		if(isset($lang) && !empty($lang)) $gc['lang'] = wp_strip_all_tags($lang);
 
  		$g_url = esc_url($gc['api-url']) . wp_strip_all_tags($gc['id']) . '/events?key=' . wp_strip_all_tags($gc['api-key']) . '&singleEvents=true';
 

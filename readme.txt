@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 4.8
-Stable tag: 1.6
+Stable tag: 2.0
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,7 @@ The plugin is to create a shortcode for displaying the list view of a public Goo
 
 = Document =
 
-Please see the documentation in detail in https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view (Japanese is https://info.cseas.kyoto-u.ac.jp/links-ja/plugin-ja/wordpress-dev-info/google-calendar-list-view)
+Please see the [documentation](https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view) in detail. [Japanese documentation](https://info.cseas.kyoto-u.ac.jp/links-ja/plugin-ja/wordpress-dev-info/google-calendar-list-view)
 
 == Installation ==
 
@@ -47,6 +47,9 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 2.1 =
+* Added shortcode option "lang". 
 
 = 2.0 =
 * Removed "lvgc_output_data" and "lvgc_gc_data" hooks for the security reason.
