@@ -173,7 +173,7 @@ ___EOF___;
 								continue;
 							endif;
 						else:
-								unset($gc_data['items'][$gc_key]); var_dump("aa");
+								unset($gc_data['items'][$gc_key]); 
 								continue;							 
 						endif;
 					endif;
