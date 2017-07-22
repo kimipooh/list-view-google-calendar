@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 4.8
-Stable tag: 2.1
+Stable tag: 2.11
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,9 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 2.11 =
+* Fixed to display a debug message in case of using lang shortcode.
 
 = 2.1 =
 * Added shortcode option "lang". 

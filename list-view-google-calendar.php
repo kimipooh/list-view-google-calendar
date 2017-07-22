@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 2.1
+Version: 2.11
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -50,7 +50,7 @@ class gclv{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 201;
+		$this->settings['version'] = 211;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -169,7 +169,7 @@ ___EOF___;
 					if(isset($gc_value['description'])):
 						if(preg_match('/#lang(\s+)(\w+)/', $gc_value['description'], $match)):
 							if(isset($match[2]) && $match[2] !== $lang):
-								unset($gc_data['items'][$gc_key]); var_dump("aa");
+								unset($gc_data['items'][$gc_key]); 
 								continue;
 							endif;
 						else:
