@@ -3,8 +3,8 @@ Contributors: kimipooh
 Donate link: 
 Tags: Google Calendar
 Requires at least: 4.0
-Tested up to: 4.8
-Stable tag: 2.11
+Tested up to: 4.8.1
+Stable tag: 2.2
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,12 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 2.2 =
+* Moved get_select_lang_data function to the extended class.
+* Create gclv_hash_tags class for getting the hash tags in the description field on Google Calendar
+* Added the template html_tag "lip".
+* Fixed CSS name.
 
 = 2.11 =
 * Fixed to display a debug message in case of using lang shortcode.
