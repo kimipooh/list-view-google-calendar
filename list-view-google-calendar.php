@@ -78,7 +78,6 @@ class gclv extends gclv_hash_tags{
 			'hook_secret_key' => '',	// If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
 			'lang'			=> '',		// List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1 
 		), $atts));
-		var_dump($atts);
 
 		$settings = get_option($this->set_op);
 		$gc_data = $this->get_google_calendar_contents($atts);
