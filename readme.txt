@@ -53,6 +53,7 @@ Deactivate the plugin.
 * Create gclv_hash_tags class for getting the hash tags in the description field on Google Calendar
 * Added the template html_tag "lip".
 * Fixed CSS name.
+* Added the attribution "hash_tags" and "hash_tags_type_title" for the hook.
 
 = 2.11 =
 * Fixed to display a debug message in case of using lang shortcode.
