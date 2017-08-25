@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 2.2
+Version: 3.0
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -50,7 +50,7 @@ class gclv extends gclv_hash_tags{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 220;
+		$this->settings['version'] = 300;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -71,13 +71,14 @@ class gclv extends gclv_hash_tags{
 			'g_api_key'		=> '',			// Google Calendar API KEY
 			'g_id'			=> '',			// Google Calendar ID
 			'max_view'		=> '',			// Maximum number of view
-			'html_tag'		=> '',
-			'html_tag_class'	=> $this->plugin_name,		// adding a class to html tag (default: $this->plugin_name) 
-			'html_tag_date_class'	=> $this->plugin_name . "_date",	// setting up a class to date in html tag
-			'html_tag_title_class'	=> $this->plugin_name . "_title",	// setting up a class to title in html tag
+			'html_tag'		=> '',			// Allow $this->html_tags value.
+			'html_tag_class'	=> '',		// adding a class to html tag (default: $this->plugin_name) 
 			'hook_secret_key' => '',	// If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
-			'lang'			=> '',		// List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1 
+			'lang'			=> '',		// List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1
+			'enable_view_category'	=> '',  // If you want to display the category (#type and #organizer), please set this value to "true" or not empty value. version 3.0
 		), $atts));
+		
+		$html_tag_class = $html_tag_class ?: $this->plugin_name;
 
 		$settings = get_option($this->set_op);
 		$gc_data = $this->get_google_calendar_contents($atts);
@@ -121,9 +122,16 @@ class gclv extends gclv_hash_tags{
 
 				// for a hook.
 				$hash_tags = $this->get_hash_tags($gc_value, $atts);
-				$hash_tags_type_title = "";
-				if(isset($hash_tags['type']['title']) && !empty($hash_tags['type']['title'])):
-					$hash_tags_type_title = $hash_tags['type']['title'];
+				$hash_tags_type_title = $hash_tags['type']['title'] ?: "";
+				$hash_tags_organizer_value = $hash_tags['organizer']['value'] ?: "";
+				$output_category_temp = '';
+				if(!empty($enable_view_category)):
+					if(!empty($hash_tags_type_title)):
+						$output_category_temp .= " <span class='${html_tag_class}_category'>$hash_tags_type_title</span> ";
+					endif;
+					if(!empty($hash_tags_organizer_value)):
+						$output_category_temp .= " <span class='${html_tag_class}_organizer'>$hash_tags_organizer_value</span> ";
+					endif;
 				endif;
 				$out_atts = array(
 					'start_date_num'	=> $start_date_num,
@@ -134,27 +142,18 @@ class gclv extends gclv_hash_tags{
 					'gc_link'			=> $gc_link,
 					'gc_title'			=> $gc_title, 
 					'plugin_name'		=> $plugin_name,
+					'html_tag_class'	=> $html_tag_class,
 					'html_tag_class_c'	=> $html_tag_class_c,
 					'id'				=> $id,
 					'lang'				=> $lang,
 					'hash_tags'			=> $hash_tags,
 					'hash_tags_type_title'	=> $hash_tags_type_title,
+					'hash_tags_organizer_value'	=> $hash_tags_organizer_value,
+					'output_category_temp'	=> $output_category_temp,	
 				);
 				$out_temp = '';
 				if(!empty($html_tag) && file_exists (dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php')):
 					include(dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php');
-				else:
-					if(!empty($hash_tags_type_title)):
-						$out_temp = <<< ___EOF___
- <li class='$html_tag_class_c tlt_item'><span class='tlt_date'>$start_date_value</span> <span class='tlt_category'>$hash_tags_type_title</span> <span class='tlt_title'><a href='$gc_link'>$gc_title</a></span></li>
- 
-___EOF___;
-					else:
-						$out_temp = <<< ___EOF___
- <li class='$html_tag_class_c tlt_item'><span class='tlt_date'>$start_date_value</span> <span class='tlt_title'><a href='$gc_link'>$gc_title</a></span></li>
- 
-___EOF___;
-					endif;
 				endif;
 				if(!empty($hook_secret_key)):
 					$out_t = wp_kses_post(apply_filters( 'lvgc_each_output_data', $out_temp, $out_atts ));

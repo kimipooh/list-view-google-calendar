@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 4.8.1
-Stable tag: 2.2
+Stable tag: 3.0
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,12 @@ Deactivate the plugin.
 
 == Changelog ==
 
+= 3.0 =
+* Added the hash tag "#organizer". If you set the hash tag, you can use $hash_tags_organizer_value or $hash_tags['organizer']['value'] on the hook.
+* Added shortcode option "enable_view_category". If you want to display the category (#type and #organizer), please set this value to "true" or not empty value (default is "")
+* Deleted "html_tag_date_class" and "html_tag_title_class" for migrating "html_tag_class".
+* Reduced the code of the template tag files (library/tags/) for more easily use.
+
 = 2.2 =
 * Moved get_select_lang_data function to the extended class.
 * Create gclv_hash_tags class for getting the hash tags in the description field on Google Calendar
@@ -55,7 +61,7 @@ Deactivate the plugin.
 * Fixed CSS name.
 * Added the attribution "hash_tags" and "hash_tags_type_title" for the hook.
 
-= 2.1.1 =
+= 2.11 =
 * Fixed to display a debug message in case of using lang shortcode.
 
 = 2.1 =
