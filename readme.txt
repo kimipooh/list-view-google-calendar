@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 4.8.1
-Stable tag: 3.0
+Stable tag: 3.1
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,9 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 3.1 = 
+* re-uploaded library/tags/lip.php template.
 
 = 3.0 =
 * Added the hash tag "#organizer". If you set the hash tag, you can use $hash_tags_organizer_value or $hash_tags['organizer']['value'] on the hook.
