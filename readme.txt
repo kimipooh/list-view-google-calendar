@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 4.8.1
-Stable tag: 3.1
+Stable tag: 4.0
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,12 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 4.0 = 
+* Support of Multi Google Calendars.
+* Fixed getting local timestamp in case of not set "start_date" option.
+* Fixed the processing for #organizer hash tag in case of including a space in the value. 
+* Changed the default for orderbysort is descending.
 
 = 3.1 = 
 * re-uploaded library/tags/lip.php template.

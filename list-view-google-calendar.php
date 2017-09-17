@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 3.1
+Version: 4.0
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -27,7 +27,7 @@ class gclv extends gclv_hash_tags{
 		'start-date'	=> '',					// Default events are from today to the future.
 		'end-date'		=> '',
 		'orderby'		=> 'startTime',			// startTime, updated (only ascending).
-		'orderbysort'	=> 'ascending',			// ascending or descending.
+		'orderbysort'	=> 'descending',			// ascending or descending.
 		'maxResults'	=> '',					// <= 2500 (https://developers.google.com/google-apps/calendar/v3/reference/events/list)
 		'html_tag'		=> '',
 	);
@@ -50,7 +50,7 @@ class gclv extends gclv_hash_tags{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 310;
+		$this->settings['version'] = 400;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -62,7 +62,14 @@ class gclv extends gclv_hash_tags{
 	}
 	public function shortcodes($atts){
 		$atts = $this->security_check_array($atts);
-		extract($atts = shortcode_atts(array(
+		// Allow g_id_*** and g_api_key_*** version 4.0
+		$atts_special_allow_options = array();
+		foreach($atts as $key=>$value):
+			if(preg_match('/^g_id_/', $key) || preg_match('/^g_api_key_/', $key)):
+				$atts_special_allow_options[$key] = $value;
+			endif;
+		endforeach;
+		$atts_options = array(
 			'id'			=> '',
 			'start_date' 	=> '',
 			'end_date'		=> '',
@@ -76,8 +83,12 @@ class gclv extends gclv_hash_tags{
 			'hook_secret_key' => '',	// If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
 			'lang'			=> '',		// List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1
 			'enable_view_category'	=> '',  // If you want to display the category (#type and #organizer), please set this value to "true" or not empty value. version 3.0
-		), $atts));
-		
+		);
+		if(!empty($atts_special_allow_options)):
+			$atts_options = array_merge($atts_options, $atts_special_allow_options);  // Overwrite the same options.
+		endif;
+		extract($atts = shortcode_atts($atts_options, $atts));
+
 		$html_tag_class = $html_tag_class ?: $this->plugin_name;
 
 		$settings = get_option($this->set_op);
@@ -124,6 +135,7 @@ class gclv extends gclv_hash_tags{
 				$hash_tags = $this->get_hash_tags($gc_value, $atts);
 				$hash_tags_type_title = $hash_tags['type']['title'] ?: "";
 				$hash_tags_organizer_value = $hash_tags['organizer']['value'] ?: "";
+				$hash_tags_organizer_value .= $hash_tags['organizer']['title'] ? ' ' . $hash_tags['organizer']['title'] :  '';
 				$output_category_temp = '';
 				if(!empty($enable_view_category)):
 					if(!empty($hash_tags_type_title)):
@@ -185,7 +197,9 @@ class gclv extends gclv_hash_tags{
 		return $array;
 	}
 	public function get_google_calendar_contents($atts){
-		if($atts) extract($atts);
+		if($atts) extract($atts = $this->security_check_array($atts));
+		
+		// Getting the settings from the setting menu.
 		$settings = get_option($this->set_op);
 		$gc = array();
 		if(isset($settings['google_calendar']))
@@ -206,6 +220,21 @@ class gclv extends gclv_hash_tags{
 		endif;
 		if(isset($lang) && !empty($lang)) $gc['lang'] = wp_strip_all_tags($lang);
 
+		// Additional Calendars (g_id_*** and g_api_key_*)
+		$g_urls = array(); 
+		foreach($atts as $key=>$value):
+			$matches = array();
+			if(preg_match('/^(g_id_)(.+)$/', $key, $matches)):
+				if(isset($matches[2]) && !empty($matches[2])):
+					if(isset($atts['g_api_key_' . $matches[2]]) && !empty($atts['g_api_key_' . $matches[2]])):
+						$g_urls[$key] = esc_url($gc['api-url']) . wp_strip_all_tags($value) . '/events?key=' . wp_strip_all_tags($atts['g_api_key_' . $matches[2]]) . '&singleEvents=true';
+					else:
+						$g_urls[$key] = esc_url($gc['api-url']) . wp_strip_all_tags($value) . '/events?key=' . wp_strip_all_tags($gc['api-key']) . '&singleEvents=true';
+					endif;
+				endif;
+			endif;
+		endforeach;
+		
 		$g_url = esc_url($gc['api-url']) . wp_strip_all_tags($gc['id']) . '/events?key=' . wp_strip_all_tags($gc['api-key']) . '&singleEvents=true';
 
 		$params = array();
@@ -216,17 +245,41 @@ class gclv extends gclv_hash_tags{
 				$params[] = 'timeMin='.urlencode(get_date_from_gmt(strtotime($gc['start-date']), 'c'));
 			endif;
 		else:
-			$params[] = 'timeMin='.urlencode(date_i18n('c'));
+			$params[] = 'timeMin='.urlencode(get_date_from_gmt(current_time(),'c'));
 		endif;
 		if(!empty($gc['end-date']))
 			$params[] = 'timeMax='.urlencode(get_date_from_gmt(strtotime($gc['end-date']), 'c'));
-
+ 
+ 		$urls = array();
+		if(!empty($g_urls)):
+			foreach($g_urls as $key=>$value):
+				$urls[$key] = $value .'&'.implode('&', $params);
+			endforeach;
+		endif;
 		$url = $g_url .'&'.implode('&', $params);
+
+		$urls_json = array();
+		$urls_results = array();
+		foreach($urls as $key=>$value):
+			$urls_results = file_get_contents($value);
+			$urls_json[$key] = $urls_results ? json_decode($urls_results, true) : '';
+		endforeach;
 
 		$results = file_get_contents($url);
 
 		$json = $results ? json_decode($results, true) : '';
-		
+
+		// Merge Events of Multi Galendar
+		if($urls_json && isset($json['items'])):
+			foreach($urls_json as $key=>$value):
+				if(isset($value['items'])):
+					foreach((array)$value['items'] as $s_key=>$s_value):
+						array_push($json['items'], $s_value);
+					endforeach;
+				endif;
+			endforeach;
+		endif;
+
 		// Instead of odersort (like Google Calendar API v2)
 		if(strtolower($gc['orderbysort']) === 'descending'):
 			if($json['items']):

@@ -70,7 +70,8 @@ class gclv_hash_tags{
 					$hash_tags[wp_strip_all_tags($match[1])] = array('value'=>wp_strip_all_tags($match[3]), 'title'=>'');
 				endif;
 			endforeach;
-		endif;		if(preg_match_all('/#(\w+)(\s+)(\w+)(\s+)([\w ]+)/u', $h_desc, $matches, PREG_SET_ORDER)):
+		endif;
+		if(preg_match_all('/#(\w+)(\s+)(\w+)(\s+)([\w ]+)/u', $h_desc, $matches, PREG_SET_ORDER)):
 			foreach($matches as $match):
 				if(isset($match[1]) && isset($match[3]) && isset($match[5])):
 					$hash_tags[wp_strip_all_tags($match[1])] = array('value'=>wp_strip_all_tags($match[3]), 'title'=>wp_strip_all_tags($match[5]));
