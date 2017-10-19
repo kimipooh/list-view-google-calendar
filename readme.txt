@@ -2,8 +2,8 @@
 Contributors: kimipooh
 Donate link: 
 Tags: Google Calendar
-Requires at least: 4.0
-Tested up to: 4.8.1
+Requires at least: 4.1
+Tested up to: 4.8.2
 Stable tag: 4.0
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -47,6 +47,9 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 4.1 = 
+* Added target="_blank" in a link tag.
 
 = 4.0 = 
 * Support of Multi Google Calendars.
