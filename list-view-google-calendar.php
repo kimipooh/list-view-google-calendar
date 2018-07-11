@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 4.2
+Version: 4.3
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -123,7 +123,7 @@ class gclv extends gclv_hash_tags{
 				$start_date_num = get_date_from_gmt($dateTime, "Ymd");
 				$start_date_value = get_date_from_gmt($dateTime, $date_format);
 				$end_date_num = get_date_from_gmt($end_dateTime, "Ymd");
-				$today_date_num = current_time("Ymd");
+				$today_date_num = date("Ymd", current_time("timestamp",0));
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 				$gc_link = esc_url($gc_value['htmlLink']);
@@ -245,7 +245,7 @@ class gclv extends gclv_hash_tags{
 				$params[] = 'timeMin='.urlencode(get_date_from_gmt(strtotime($gc['start-date']), 'c'));
 			endif;
 		else:
-			$params[] = 'timeMin='.urlencode(get_date_from_gmt(current_time(),'c'));
+			$params[] = 'timeMin='.urlencode(date('c', current_time("timestamp",0)));
 		endif;
 		if(!empty($gc['end-date']))
 			$params[] = 'timeMax='.urlencode(get_date_from_gmt(strtotime($gc['end-date']), 'c'));

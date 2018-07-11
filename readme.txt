@@ -3,8 +3,8 @@ Contributors: kimipooh
 Donate link: 
 Tags: Google Calendar
 Requires at least: 4.0
-Tested up to: 4.9
-Stable tag: 4.2
+Tested up to: 5.0
+Stable tag: 4.3
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,10 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 4.3 = 
+* Fixed current_time function error.
+* Tested up WordPress 5.0.
 
 = 4.2 = 
 * Tested up WordPress 4.9.
