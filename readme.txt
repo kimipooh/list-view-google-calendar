@@ -50,7 +50,7 @@ Deactivate the plugin.
 
 = 4.3 = 
 * Fixed current_time function error.
-* Tested up WordPress 5.0.
+* Tested up WordPress 5.0 and php 7.2.
 
 = 4.2 = 
 * Tested up WordPress 4.9.
