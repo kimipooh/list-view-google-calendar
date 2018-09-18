@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 4.3
+Version: 4.4
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -50,7 +50,7 @@ class gclv extends gclv_hash_tags{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 410;
+		$this->settings['version'] = 440;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -128,6 +128,7 @@ class gclv extends gclv_hash_tags{
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 				$gc_link = esc_url($gc_value['htmlLink']);
 				$gc_title = esc_html($gc_value['summary']);
+				$gc_description = esc_html($gc_value['description']);
 				$plugin_name = $this->plugin_name;
 				$html_tag_class_c = $holding_flag ? $html_tag_class . '_holding' : $html_tag_class; 
 
@@ -153,6 +154,7 @@ class gclv extends gclv_hash_tags{
 					'holding_flag'		=> $holding_flag,
 					'gc_link'			=> $gc_link,
 					'gc_title'			=> $gc_title, 
+					'gc_description'	=> $gc_description, 
 					'plugin_name'		=> $plugin_name,
 					'html_tag_class'	=> $html_tag_class,
 					'html_tag_class_c'	=> $html_tag_class_c,

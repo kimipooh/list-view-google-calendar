@@ -4,8 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 5.0
-Requires PHP: 5.6
-Stable tag: 4.3
+Stable tag: 4.4
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +47,9 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 4.4 = 
+* Added the value of "gc_description" on the hook.
 
 = 4.3 = 
 * Fixed current_time function error.
