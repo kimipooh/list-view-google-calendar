@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 4.4
+Version: 4.5
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -50,7 +50,7 @@ class gclv extends gclv_hash_tags{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 440;
+		$this->settings['version'] = 450;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -74,7 +74,7 @@ class gclv extends gclv_hash_tags{
 			'start_date' 	=> '',
 			'end_date'		=> '',
 			'date_format'	=> 'Y.m.d', 
-			'orderbysort'	=> '',			// ascending or descending.
+			'orderbysort'	=> 'descending',// ascending or descending.
 			'g_api_key'		=> '',			// Google Calendar API KEY
 			'g_id'			=> '',			// Google Calendar ID
 			'max_view'		=> '',			// Maximum number of view
@@ -244,14 +244,13 @@ class gclv extends gclv_hash_tags{
 		$params[] = 'maxResults=' . (int)(isset($gc['maxResults']) ? wp_strip_all_tags($gc['maxResults']) : $this->default_maxResults);
 		if(!empty($gc['start-date'])):
 			if(strtolower($gc['start-date']) !== 'all'):
-				$params[] = 'timeMin='.urlencode(get_date_from_gmt(strtotime($gc['start-date']), 'c'));
+				$params[] = 'timeMin='.urlencode(get_date_from_gmt($gc['start-date'], 'c'));
 			endif;
 		else:
 			$params[] = 'timeMin='.urlencode(date('c', current_time("timestamp",0)));
 		endif;
 		if(!empty($gc['end-date']))
-			$params[] = 'timeMax='.urlencode(get_date_from_gmt(strtotime($gc['end-date']), 'c'));
- 
+			$params[] = 'timeMax='.urlencode(get_date_from_gmt($gc['end-date'], 'c'));
  		$urls = array();
 		if(!empty($g_urls)):
 			foreach($g_urls as $key=>$value):
