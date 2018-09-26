@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 5.0
-Stable tag: 4.5
+Stable tag: 4.5.1
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,9 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 4.5.1 = 
+* Fixed help message for "start_date", "end_date" shortcode's date format on the setting menu.
 
 = 4.5 = 
 * Fixed the processing of "start_date", "end_date" shortcode's options.
