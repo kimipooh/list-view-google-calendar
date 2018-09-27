@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 4.5.1
+Version: 4.6
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -50,7 +50,7 @@ class gclv extends gclv_hash_tags{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 451;
+		$this->settings['version'] = 460;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -95,7 +95,7 @@ class gclv extends gclv_hash_tags{
 		$gc_data = $this->get_google_calendar_contents($atts);
 		// get lang data.
 		$gc_data = $this->get_select_lang_data($gc_data, $atts);
-		// Security check for the hook (clean up ALL html tag).
+		// Security check for the hook (clean up ALL html tag except description).
 		$gc_data = $this->security_check_array($gc_data);
 
 		if(isset($html_tag) && !empty($html_tag)): 
@@ -128,7 +128,8 @@ class gclv extends gclv_hash_tags{
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 				$gc_link = esc_url($gc_value['htmlLink']);
 				$gc_title = esc_html($gc_value['summary']);
-				$gc_description = esc_html($gc_value['description']);
+				$gc_description = $gc_value['description'];
+//				$gc_description = esc_html($gc_value['description']);
 				$plugin_name = $this->plugin_name;
 				$html_tag_class_c = $holding_flag ? $html_tag_class . '_holding' : $html_tag_class; 
 
@@ -186,16 +187,22 @@ class gclv extends gclv_hash_tags{
 		return $out;
 	}
 
+	// Remove all tag except "description" on Google Calendar
 	public function security_check_array($array){
+		static $exception = "";
 		if (empty($array)) return $array;
 		if(is_array($array)):
 				foreach($array as $k => $v):
+					if($k === "description") $exception = "description";
+					else $exception = "";
 					$array[$k] = $this->security_check_array($v);
 				endforeach;
 		else:
-			$array = esc_html(wp_strip_all_tags($array)); 
+			if($exception === "description")
+				$array = wp_kses_post($array); 
+			else
+				$array = esc_html(wp_strip_all_tags($array)); 
 		endif;
-		
 		return $array;
 	}
 	public function get_google_calendar_contents($atts){
