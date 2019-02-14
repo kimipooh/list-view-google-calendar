@@ -50,8 +50,10 @@ Deactivate the plugin.
 
 = 5.0 = 
 * Supported the strtotime date format for shortcut option "start_date" and "end_date". Various date formats for strtotime function, such as "now", "+1 days", "-2 days", "yesterday", "-1 week", and so on can be used.
+* Added new shortcode option "max_display". "max_view" is for getting the number of items from Google Calendars. "max_display" is for displaying the number of items. If "max_display" isn't set, "max_display" is automatically set the value of "max_view" value. If there are mixed events (1.2.3. events in Japanese, 5.6.7. events in English) and set "max_view=5", lang="en", 5. and 6. events are only displayed. Therefore, you need to set "max_view" is 6 or more and "max_display" is 5. By these shortcut options, the plugin gets 6 ore more events and picks up 5 events in English among 6 or more events. 
 * Fixed the issue which could not get a date if the WordPress timezone setting is "Offset" time (+9, -1, etc.).
 * Fixed the processing issue regarding max_view (maxResults) value in case of multi Google calendars.
+
 
 = 4.6 = 
 * Allowed the html tag on "description" of Google Calendar.

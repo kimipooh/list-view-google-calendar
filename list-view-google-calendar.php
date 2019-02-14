@@ -27,8 +27,8 @@ class gclv extends gclv_hash_tags{
 		'start-date'	=> '',					// Default events are from today to the future.
 		'end-date'		=> '',
 		'orderby'		=> 'startTime',			// startTime, updated (only ascending).
-		'orderbysort'	=> 'descending',			// ascending or descending.
-		'maxResults'	=> '',					// <= 2500 (https://developers.google.com/google-apps/calendar/v3/reference/events/list)
+		'orderbysort'	=> 'descending',		// ascending or descending.
+		'maxResults'	=> '',					// Get items <= 2500 (https://developers.google.com/google-apps/calendar/v3/reference/events/list)
 		'html_tag'		=> '',
 	);
 	var $lang_dir = 'lang';	// Language folder name
@@ -144,6 +144,7 @@ class gclv extends gclv_hash_tags{
 			'g_api_key'		=> '',			// Google Calendar API KEY
 			'g_id'			=> '',			// Google Calendar ID
 			'max_view'		=> '',			// Maximum number of view
+			'max_display'		=> '',		// Maximum number of display
 			'html_tag'		=> '',			// Allow $this->html_tags value.
 			'html_tag_class'	=> '',		// adding a class to html tag (default: $this->plugin_name) 
 			'hook_secret_key' => '',	// If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
@@ -323,31 +324,6 @@ class gclv extends gclv_hash_tags{
 		$params = array();
 		$params[] = 'orderBy=' . wp_strip_all_tags($this->google_calendar['orderby']);
 		$params[] = 'maxResults=' . (int)(isset($gc['maxResults']) ? wp_strip_all_tags($gc['maxResults']) : $this->default_maxResults);
-		/* No limitation : Start Date = empty/all, End Date = empty/all
-		 * Start Date = now : Start Date = empty/all, End Date != empty/all
-		 * Start Date = value : Start Date != empty/all, End Date = empty/all
-		 * Start/End Date = value : Start Date != empty/all, End Date != empty/all
-		if(!empty($gc['start-date'])):
-			if(strtolower($gc['start-date']) != "all"):
-				if(strtolower($gc['start-date'])=== "now"):
-					$params[] = 'timeMin='.urlencode($today_start_date);
-				else:
-					$params[] = 'timeMin='.urlencode($gc_start_date);
-				endif;
-			endif;
-		elseif(!empty($gc['end-date'])):
-			$params[] = 'timeMin='.urlencode($today_start_date);
-		endif;
-		if(!empty($gc['end-date'])):
-			if(strtolower($gc['end-date']) != "all"):
-				if(strtolower($gc['end-date']) == "now"):
-					$params[] = 'timeMax='.urlencode($today_end_date);
-				else:
-					$params[] = 'timeMax='.urlencode($gc_end_date);
-				endif;
-			endif;
-		endif;
-		*/
 		/* No limitation : Start Date = all, End Date = empty/all
 		 * Start Date = now : Start Date = empty
 		 * Start Date = value : Start Date != empty/all
@@ -423,11 +399,14 @@ class gclv extends gclv_hash_tags{
 			endif;
 		endif;
 		
-		// Pick up $max_view array from the head of $json (data).
-		if(isset($gc['maxResults']) && !empty($gc['maxResults'])):
+		/* Pick up $max_display array from the head of $json (data).
+		*/
+		if(!empty($max_display) && $max_display > 0):
+			$json['items'] = array_slice($json['items'], 0, (int)$max_display);
+		elseif(isset($gc['maxResults']) && !empty($gc['maxResults'])):
 			$json['items'] = array_slice($json['items'], 0, (int)$gc['maxResults']);
 		endif;
-		
+	
 		return $json;
 	}
 	public function add_to_settings_menu(){
