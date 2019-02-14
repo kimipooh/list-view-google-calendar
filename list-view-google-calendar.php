@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 4.6
+Version: 5.0
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -50,7 +50,8 @@ class gclv extends gclv_hash_tags{
 		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
-		$this->settings['version'] = 460;
+		$this->settings = $this->google_calendar; // Save to default settings.
+		$this->settings['version'] = 500;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -60,6 +61,71 @@ class gclv extends gclv_hash_tags{
 		// Remove Save data.
 		delete_option($this->set_op);
 	}
+	
+	/* WordPress Timezone are 2 types (Strings (ex. "Asia/Tokyo") or Offset (ex. +9,-1, or etc.) ).
+	* "get_date_from_gmt" function requires "String" timezone set (ex. "Asia/Tokyo"), so if WordPress timezone is set by Offset, the date gotten by this function is incorrect. Therefore, if a plugin/theme needs to handle a date with timezone on WordPress, the special handling for not only the timezone set (String) but also the timezone (Offset) is required.
+	* The library can handle the date with both of 2 types Timezone on WordPress!
+	*/
+	public  function  wp_datetime_converter_init(){
+		$timezone_set = '';
+		// WordPress Timezone are 2 types (Strings or Offset).
+		$timezone_set = get_option('timezone_string');
+		if (! $timezone_set ):
+			$gmt_offset  = get_option( 'gmt_offset' );
+			$gmt_hours   = (int) $gmt_offset;
+			$gmt_minutes = ( $gmt_offset - floor( $gmt_offset ) ) * 60;
+			$timezone_set  = sprintf( '%+03d:%02d', $gmt_hours, $gmt_minutes );
+		endif;
+		return $timezone_set;
+	}
+	// Get current time with Timezone.
+	public function wp_datetime_converter_current_time($format="c"){
+		$timezone_set = $this->wp_datetime_converter_init();
+		$date_obj = new DateTime('', new DateTimeZone($timezone_set)); // get UTC time.
+		return $date_obj->format($format);
+	}		
+		
+	// Get the date time with WordPress timezone.
+	public function wp_datetime_converter_get_date_from_gmt($format="c", $dateTime, $timezone_set=""){
+		$timezone_set = $this->wp_datetime_converter_init();
+		if(empty($dateTime)) return $date;
+		if(empty($timezone_set)) return $timezone_set;
+		$date_obj = new DateTime(date('Y-m-d H:i:s', strtotime($dateTime))); // UTC timezone
+		$date_obj->setTimezone(new DateTimeZone($timezone_set)); // Set timezone.
+		return $date_obj->format($format);
+	}
+
+	// Set the date time with WordPress timezone.
+	public function wp_datetime_converter_setTimeZone($format="c", $dateTime, $timezone_set=""){
+		$timezone_set = $this->wp_datetime_converter_init();
+		if(empty($dateTime)) return $date;
+		if(empty($timezone_set)) return $timezone_set;
+		$date_obj = new DateTime(date('Y-m-d H:i:s', strtotime($dateTime)), new DateTimeZone($timezone_set)); // Set timezone.
+		return $date_obj->format($format);
+	}
+	
+	// Convert time to the beginning of the day or the end of the day with WordPress timezone.
+	// Default: convert to the beginning of the day.
+	public function wp_datetime_converter_setDayTime($format="c", $dateTime,  $flag="start", $timezone_set=""){
+		$timezone_set = $this->wp_datetime_converter_init();
+		if(empty($dateTime)) return $date;
+		if(empty($timezone_set)) return $timezone_set;
+
+		if($dateTime == strtolower("today")):
+			$date_obj = new DateTime('', new DateTimeZone($timezone_set)); // Set timezone.
+		else:
+			$date_obj = new DateTime(date('Y-m-d H:i:s', strtotime($dateTime)), new DateTimeZone($timezone_set)); // Set timezone.
+		endif;
+		if($flag == strtolower("start")):
+			$date_num = mktime(0,0,0,$date_obj->format("m"), $date_obj->format("d"), $date_obj->format("Y"));
+		else:
+			$date_num = mktime(23,59,59,$date_obj->format("m"), $date_obj->format("d"), $date_obj->format("Y"));
+		endif;
+		$date_obj = new DateTime(date('Y-m-d H:i:s', $date_num), new DateTimeZone($timezone_set));
+		
+		return $date_obj->format($format);
+	}
+
 	public function shortcodes($atts){
 		$atts = $this->security_check_array($atts);
 		// Allow g_id_*** and g_api_key_*** version 4.0
@@ -107,7 +173,7 @@ class gclv extends gclv_hash_tags{
 		
 		$out = ''; 
 		$match = array();
-		if($gc_data['items']): 
+		if( isset($gc_data['items']) ): 
 			foreach($gc_data['items'] as $gc_key=>$gc_value):
 				if(isset($gc_value['start']['dateTime'])):
 					$dateTime = $gc_value['start']['dateTime'];
@@ -119,11 +185,12 @@ class gclv extends gclv_hash_tags{
 				else:
 					$end_dateTime = $gc_value['end']['date'];
 				endif;
-				
-				$start_date_num = get_date_from_gmt($dateTime, "Ymd");
-				$start_date_value = get_date_from_gmt($dateTime, $date_format);
-				$end_date_num = get_date_from_gmt($end_dateTime, "Ymd");
-				$today_date_num = date("Ymd", current_time("timestamp",0));
+
+				$today_date_num = $this->wp_datetime_converter_current_time("Ymd");
+				$start_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $dateTime);
+				$start_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $dateTime);
+				$end_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $end_dateTime);
+
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 				$gc_link = esc_url($gc_value['htmlLink']);
@@ -131,7 +198,7 @@ class gclv extends gclv_hash_tags{
 				$gc_description = $gc_value['description'];
 //				$gc_description = esc_html($gc_value['description']);
 				$plugin_name = $this->plugin_name;
-				$html_tag_class_c = $holding_flag ? $html_tag_class . '_holding' : $html_tag_class; 
+				$html_tag_class_c = $holding_flag ? $html_tag_class . '_holding' : $html_tag_class;
 
 				// for a hook.
 				$hash_tags = $this->get_hash_tags($gc_value, $atts);
@@ -186,7 +253,7 @@ class gclv extends gclv_hash_tags{
 
 		return $out;
 	}
-
+	
 	// Remove all tag except "description" on Google Calendar
 	public function security_check_array($array){
 		static $exception = "";
@@ -210,10 +277,11 @@ class gclv extends gclv_hash_tags{
 		
 		// Getting the settings from the setting menu.
 		$settings = get_option($this->set_op);
+
 		$gc = array();
+		$gc['api-url'] = $this->google_calendar['api-url'];
 		if(isset($settings['google_calendar']))
 			$gc = $settings['google_calendar'];
-
 		// Priority of the attribution value in the shortcode.
 		if(isset($start_date) && !empty($start_date)) $gc['start-date'] = wp_strip_all_tags($start_date);
 		if(isset($end_date) && !empty($end_date)) $gc['end-date'] = wp_strip_all_tags($end_date);
@@ -246,19 +314,67 @@ class gclv extends gclv_hash_tags{
 		
 		$g_url = esc_url($gc['api-url']) . wp_strip_all_tags($gc['id']) . '/events?key=' . wp_strip_all_tags($gc['api-key']) . '&singleEvents=true';
 
+		$gc_start_date = $this->wp_datetime_converter_setDayTime("c", $gc['start-date']);
+		$gc_end_date = $this->wp_datetime_converter_setDayTime("c", $gc['end-date']);
+		$today_date = $this->wp_datetime_converter_current_time("c");
+		$today_start_date = $this->wp_datetime_converter_setDayTime("c", "today", "start");
+		$today_end_date = $this->wp_datetime_converter_setDayTime("c", "today", "end");
+
 		$params = array();
 		$params[] = 'orderBy=' . wp_strip_all_tags($this->google_calendar['orderby']);
 		$params[] = 'maxResults=' . (int)(isset($gc['maxResults']) ? wp_strip_all_tags($gc['maxResults']) : $this->default_maxResults);
+		/* No limitation : Start Date = empty/all, End Date = empty/all
+		 * Start Date = now : Start Date = empty/all, End Date != empty/all
+		 * Start Date = value : Start Date != empty/all, End Date = empty/all
+		 * Start/End Date = value : Start Date != empty/all, End Date != empty/all
 		if(!empty($gc['start-date'])):
-			if(strtolower($gc['start-date']) !== 'all'):
-				$params[] = 'timeMin='.urlencode(get_date_from_gmt($gc['start-date'], 'c'));
+			if(strtolower($gc['start-date']) != "all"):
+				if(strtolower($gc['start-date'])=== "now"):
+					$params[] = 'timeMin='.urlencode($today_start_date);
+				else:
+					$params[] = 'timeMin='.urlencode($gc_start_date);
+				endif;
+			endif;
+		elseif(!empty($gc['end-date'])):
+			$params[] = 'timeMin='.urlencode($today_start_date);
+		endif;
+		if(!empty($gc['end-date'])):
+			if(strtolower($gc['end-date']) != "all"):
+				if(strtolower($gc['end-date']) == "now"):
+					$params[] = 'timeMax='.urlencode($today_end_date);
+				else:
+					$params[] = 'timeMax='.urlencode($gc_end_date);
+				endif;
+			endif;
+		endif;
+		*/
+		/* No limitation : Start Date = all, End Date = empty/all
+		 * Start Date = now : Start Date = empty
+		 * Start Date = value : Start Date != empty/all
+		 * End Date = value : End Date != empty/all
+		*/
+		if(!empty($gc['start-date'])):
+			if(strtolower($gc['start-date']) != "all"):
+				if(strtolower($gc['start-date']) === "now"):
+					$params[] = 'timeMin='.urlencode($today_start_date);
+				else:
+					$params[] = 'timeMin='.urlencode($gc_start_date);
+				endif;
 			endif;
 		else:
-			$params[] = 'timeMin='.urlencode(date('c', current_time("timestamp",0)));
+			$params[] = 'timeMin='.urlencode($today_start_date);
 		endif;
-		if(!empty($gc['end-date']))
-			$params[] = 'timeMax='.urlencode(get_date_from_gmt($gc['end-date'], 'c'));
- 		$urls = array();
+		if(!empty($gc['end-date'])):
+			if(strtolower($gc['end-date']) != "all"):
+				if(strtolower($gc['end-date']) == "now"):
+					$params[] = 'timeMax='.urlencode($today_end_date);
+				else:
+					$params[] = 'timeMax='.urlencode($gc_end_date);
+				endif;
+			endif;
+		endif;
+
+		$urls = array();
 		if(!empty($g_urls)):
 			foreach($g_urls as $key=>$value):
 				$urls[$key] = $value .'&'.implode('&', $params);
@@ -289,7 +405,7 @@ class gclv extends gclv_hash_tags{
 		endif;
 
 		// Instead of odersort (like Google Calendar API v2)
-		if(strtolower($gc['orderbysort']) === 'descending'):
+		if(strtolower($gc['orderbysort']) === "descending"):
 			if($json['items']):
 				$s_date = array(); 
 				foreach($json['items'] as $item):
@@ -305,6 +421,11 @@ class gclv extends gclv_hash_tags{
 				endforeach; 
 				array_multisort($s_date, SORT_DESC, $json['items']);
 			endif;
+		endif;
+		
+		// Pick up $max_view array from the head of $json (data).
+		if(isset($gc['maxResults']) && !empty($gc['maxResults'])):
+			$json['items'] = array_slice($json['items'], 0, (int)$gc['maxResults']);
 		endif;
 		
 		return $json;
@@ -377,21 +498,21 @@ class gclv extends gclv_hash_tags{
      <br/>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
         <legend><h3><?php _e('Google Calendar API Settings', $this->plugin_name); ?></h3></legend>
-        <div style="overflow:noscroll; height: 400px;">
+        <div style="overflow:noscroll; height: 520px;">
          <br/>
          <table>
             <tr><td><strong>1. <?php _e('Google Calendar API Key: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-api-key" type="text" value="<?php print esc_attr($this->google_calendar['api-key']);?>" size="60" maxlength="100"/> </td></tr>
             <tr><td><strong>2. <?php _e('Google Calendar ID: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-id" type="text" value="<?php print esc_attr($this->google_calendar['id']);?>" size="60" maxlength="100"/></td></tr>
-            <tr><td><strong>3. <?php _e('Start Date (YYYY-MM-DD/ALL): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-start-date" type="text" value="<?php print esc_attr($this->google_calendar['start-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="https://developer.wordpress.org/reference/functions/get_date_from_gmt/" target="_blank">get_date_from_gmt</a> date format is supported.)', $this->plugin_name); ?></td></tr>
-            <tr><td><strong>4. <?php _e('End Date (YYYY-MM-DD): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-end-date" type="text" value="<?php print esc_attr($this->google_calendar['end-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="https://developer.wordpress.org/reference/functions/get_date_from_gmt/" target="_blank">get_date_from_gmt</a> date format is supported.)', $this->plugin_name); ?></td></tr>
+            <tr><td><strong>3. <?php _e('Start Date (YYYY-MM-DD/ALL): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-start-date" type="text" value="<?php print esc_attr($this->google_calendar['start-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?></td></tr>
+            <tr><td><strong>4. <?php _e('End Date (YYYY-MM-DD): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-end-date" type="text" value="<?php print esc_attr($this->google_calendar['end-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?></td></tr>
             <tr><td><strong>5. <?php _e('maxResults (Default value is 10): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-maxResults" type="text" value="<?php print esc_attr($this->google_calendar['maxResults'] ? $this->google_calendar['maxResults'] : $this->default_maxResults);?>" size="30" maxlength="100"/> <?php _e('(0 > maxResults <= 2500 | <a href="https://developers.google.com/google-apps/calendar/v3/reference/events/list" target="_blank">Events: list</a>)', $this->plugin_name); ?></td></tr>
             <tr><td colspan="2">
              <ol>
                <li><?php _e('Get Google Calendar API Key from <a href="https://console.developers.google.com/" target="_blank">Google Developer Console</a> (Reference: <a href="https://docs.simplecalendar.io/google-api-key/?utm_source=inside-plugin&utm_medium=link&utm_campaign=core-plugin&utm_content=settings-link" target="_blank">Creating Google API Key</a> by Simple Calendar Documentation)', $this->plugin_name); ?></li>
                <li><?php _e('Get Google Calendar ID from a public Google Calendar setting (Reference: <a href="https://docs.simplecalendar.io/find-google-calendar-id/" target="_blank">Finding Your Google Calendar ID</a> by Simple Calendar Documentation', $this->plugin_name); ?></li>
-               <li><?php _e('If "Start Date" or "End Date" are setting up, get Google Calendar events from "Start Date" to "End Date".', $this->plugin_name); ?> <?php _e('Default value is empty (=current date). If "ALL" value is setting up, start_date value is unlimited.', $this->plugin_name); ?></li>
-               <li><?php _e('If both of "Start Date" and "End Date" are empty, get Google Calendar events without date limitation.', $this->plugin_name); ?></li>
-               <li><?php _e('maxResults is maximum number of events returned on one result page.', $this->plugin_name); ?></li>
+               <li><?php _e('If "Start Date" or "End Date" are setting up, get Google Calendar events from "Start Date" to "End Date".', $this->plugin_name); ?> <?php _e('Default value is empty (start_date value = current date).', $this->plugin_name); ?></li>
+               <li><?php _e('"Start Date" and "End Date" can use the value of "now" and "ALL". "now" means current date. "ALL" means unlimited.', $this->plugin_name); ?> <?php _e('"Start Date" and "End Date" can use <a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> data format. "-2 days" means 2 days ago from current time. "+1 days" means 1 day later from current time. In detail, please see <a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> help.', $this->plugin_name); ?></li>
+               <li><?php _e('maxResults is maximum number of events returned on one result page. If multiple calendars are specified, this plugin gets maxResults number of events from each calendars and sort by order into them. And then, it picks up maxResults number of latest events from sorted events. (ex. maxResults = 10, Calendar A/B. It gets total 20 events from Calendar A (10 events) and Calendar B(10 events) and 20 events are sorted by order, and then picked up latest 10 events).', $this->plugin_name); ?></li>
              </ol>
             </td></tr>
          </table>

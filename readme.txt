@@ -8,11 +8,11 @@ Stable tag: 4.6
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
+The plugin is to create a shortcode for displaying the list view of public Google Calendars.
  
 == Description ==
 
-The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
+The plugin is to create a shortcode for displaying the list view of public Google Calendars.
 
 = Document =
 
@@ -47,6 +47,11 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 5.0 = 
+* Supported the strtotime date format for shortcut option "start_date" and "end_date". Various date formats for strtotime function, such as "now", "+1 days", "-2 days", "yesterday", "-1 week", and so on can be used.
+* Fixed the issue which could not get a date if the WordPress timezone setting is "Offset" time (+9, -1, etc.).
+* Fixed the processing issue regarding max_view (maxResults) value in case of multi Google calendars.
 
 = 4.6 = 
 * Allowed the html tag on "description" of Google Calendar.
