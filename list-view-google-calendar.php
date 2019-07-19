@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.0
+Version: 5.1
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -51,7 +51,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 500;
+		$this->settings['version'] = 510;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -128,6 +128,10 @@ class gclv extends gclv_hash_tags{
 
 	public function shortcodes($atts){
 		$atts = $this->security_check_array($atts);
+		// If there are not any options, $atts will be initialized by array().
+		if(empty($atts) || !is_array($atts)):
+			$atts = array();
+		endif;
 		// Allow g_id_*** and g_api_key_*** version 4.0
 		$atts_special_allow_options = array();
 		foreach($atts as $key=>$value):
@@ -358,14 +362,19 @@ class gclv extends gclv_hash_tags{
 		endif;
 		$url = $g_url .'&'.implode('&', $params);
 
+		// Fixed the warning : Ref. https://qiita.com/kawaguchi_011/items/29cc3811b2bc2ce2d85e
+		$fgc_context = stream_context_create(array(
+			 'http' => array('ignore_errors' => true),
+		));
+		
 		$urls_json = array();
 		$urls_results = array();
 		foreach($urls as $key=>$value):
-			$urls_results = file_get_contents($value);
+			$urls_results = file_get_contents($value, false, $fgc_context);
 			$urls_json[$key] = $urls_results ? json_decode($urls_results, true) : '';
 		endforeach;
 
-		$results = file_get_contents($url);
+		$results = file_get_contents($url, false, $fgc_context);
 
 		$json = $results ? json_decode($results, true) : '';
 
@@ -382,7 +391,7 @@ class gclv extends gclv_hash_tags{
 
 		// Instead of odersort (like Google Calendar API v2)
 		if(strtolower($gc['orderbysort']) === "descending"):
-			if($json['items']):
+			if(isset($json['items']) && !empty($json['item'])):
 				$s_date = array(); 
 				foreach($json['items'] as $item):
 					if($this->google_calendar['orderby'] === strtolower('updated')):
@@ -401,12 +410,14 @@ class gclv extends gclv_hash_tags{
 		
 		/* Pick up $max_display array from the head of $json (data).
 		*/
-		if(!empty($max_display) && $max_display > 0):
-			$json['items'] = array_slice($json['items'], 0, (int)$max_display);
-		elseif(isset($gc['maxResults']) && !empty($gc['maxResults'])):
-			$json['items'] = array_slice($json['items'], 0, (int)$gc['maxResults']);
+		if(isset($json['item'])):
+			if(!empty($max_display) && $max_display > 0):
+				$json['items'] = array_slice($json['items'], 0, (int)$max_display);
+			elseif(isset($gc['maxResults']) && !empty($gc['maxResults'])):
+				$json['items'] = array_slice($json['items'], 0, (int)$gc['maxResults']);
+			endif;
 		endif;
-	
+		
 		return $json;
 	}
 	public function add_to_settings_menu(){

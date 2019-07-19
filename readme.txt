@@ -3,8 +3,8 @@ Contributors: kimipooh
 Donate link: 
 Tags: Google Calendar
 Requires at least: 4.0
-Tested up to: 5.0
-Stable tag: 5.0
+Tested up to: 5.2.2
+Stable tag: 5.1
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,12 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 5.1 = 
+* Tested up WordPress 5.2.2 and php 7.3.
+* Fixed the array check issue in get_google_calendar_contents function.
+* Fixed the error message issue in case that there are not any shortcode options.
+* Fixed the warning message issue  for file_get_contents function.
 
 = 5.0 = 
 * Supported the strtotime date format for shortcut option "start_date" and "end_date". Various date formats for strtotime function, such as "now", "+1 days", "-2 days", "yesterday", "-1 week", and so on can be used.
