@@ -52,7 +52,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 510;
+		$this->settings['version'] = 520;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
