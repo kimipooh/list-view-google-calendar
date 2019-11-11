@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.1
+Version: 5.2
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -47,7 +47,8 @@ class gclv extends gclv_hash_tags{
 
 	}
 	public function enable_language_translation(){
-		load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
+		load_plugin_textdomain($this->plugin_name)
+		or load_plugin_textdomain($this->plugin_name, false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
@@ -389,9 +390,9 @@ class gclv extends gclv_hash_tags{
 			endforeach;
 		endif;
 
-		// Instead of odersort (like Google Calendar API v2)
+		// Instead of ordersort (like Google Calendar API v2)
 		if(strtolower($gc['orderbysort']) === "descending"):
-			if(isset($json['items']) && !empty($json['item'])):
+			if(isset($json['items']) && !empty($json['items'])):
 				$s_date = array(); 
 				foreach($json['items'] as $item):
 					if($this->google_calendar['orderby'] === strtolower('updated')):
@@ -410,7 +411,7 @@ class gclv extends gclv_hash_tags{
 		
 		/* Pick up $max_display array from the head of $json (data).
 		*/
-		if(isset($json['item'])):
+		if(isset($json['items'])):
 			if(!empty($max_display) && $max_display > 0):
 				$json['items'] = array_slice($json['items'], 0, (int)$max_display);
 			elseif(isset($gc['maxResults']) && !empty($gc['maxResults'])):
