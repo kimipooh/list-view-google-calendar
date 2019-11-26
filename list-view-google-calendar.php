@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.2
+Version: 5.3
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -52,7 +52,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 520;
+		$this->settings['version'] = 530;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -391,21 +391,27 @@ class gclv extends gclv_hash_tags{
 		endif;
 
 		// Instead of ordersort (like Google Calendar API v2)
-		if(strtolower($gc['orderbysort']) === "descending"):
-			if(isset($json['items']) && !empty($json['items'])):
-				$s_date = array(); 
-				foreach($json['items'] as $item):
-					if($this->google_calendar['orderby'] === strtolower('updated')):
-						$s_date[] = $item['updated'];
+		// Sorting at every time for Multi Calendar 
+		if(isset($json['items']) && !empty($json['items'])):
+			$s_date = array(); 
+			foreach($json['items'] as $key=>$item):
+				if($this->google_calendar['orderby'] === strtolower('updated')):
+					$s_date[] = $item['updated'];
+					$json['items'][$key][$this->google_calendar['orderby']] = $item['updated'];
+				else:
+					if(isset($item['start']['dateTime'])):
+						$s_date[] = $item['start']['dateTime'];
+						$json['items'][$key][$this->google_calendar['orderby']] = $item['start']['dateTime'];
 					else:
-						if(isset($item['start']['dateTime'])):
-							$s_date[] = $item['start']['dateTime'];
-						else:
-							$s_date[] = $item['start']['date'];
-						endif;
+						$s_date[] = $item['start']['date'];
+						$json['items'][$key][$this->google_calendar['orderby']] = $item['start']['date'];
 					endif;
-				endforeach; 
-				array_multisort($s_date, SORT_DESC, $json['items']);
+				endif;
+			endforeach; 
+			if(strtolower($gc['orderbysort']) !== "descending"):
+				array_multisort($s_date, SORT_ASC,$json['items']);
+			else:
+				array_multisort($s_date, SORT_DESC,$json['items']);
 			endif;
 		endif;
 		

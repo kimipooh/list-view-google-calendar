@@ -3,8 +3,8 @@ Contributors: kimipooh
 Donate link: 
 Tags: Google Calendar
 Requires at least: 4.0
-Tested up to: 5.2.4
-Stable tag: 5.2
+Tested up to: 5.3
+Stable tag: 5.3
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,10 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 5.3 = 
+* Tested up WordPress 5.3 and php 7.3.
+* Fixed the sort issue for the multi-calendar.
 
 = 5.2 = 
 * Tested up WordPress 5.2.4 and php 7.3.
