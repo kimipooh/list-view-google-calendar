@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.3
+Version: 5.4
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -52,7 +52,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 530;
+		$this->settings['version'] = 540;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -196,6 +196,7 @@ class gclv extends gclv_hash_tags{
 				$start_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $dateTime);
 				$start_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $dateTime);
 				$end_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $end_dateTime);
+				$end_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $end_dateTime);
 
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
@@ -224,6 +225,7 @@ class gclv extends gclv_hash_tags{
 					'start_date_num'	=> $start_date_num,
 					'start_date_value'	=> $start_date_value,
 					'end_date_num'		=> $end_date_num,
+					'end_date_value'	=> $end_date_value,
 					'today_date_num'	=> $today_date_num,
 					'holding_flag'		=> $holding_flag,
 					'gc_link'			=> $gc_link,
@@ -242,11 +244,11 @@ class gclv extends gclv_hash_tags{
 				$out_temp = '';
 				if(!empty($html_tag) && file_exists (dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php')):
 					include(dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php');
-				endif;
+				endif; 
 				if(!empty($hook_secret_key)):
-					$out_t = wp_kses_post(apply_filters( 'lvgc_each_output_data', $out_temp, $out_atts ));
+					$out_t = apply_filters( 'lvgc_each_output_data', $out_temp, $out_atts );
 					if(isset($out_t['hook_secret_key']) && $hook_secret_key === $out_t['hook_secret_key']):
-						$out .= $out_t['data'];
+						$out .= wp_kses_post($out_t['data']);
 					else:
 						$out .= $out_temp;
 					endif;
