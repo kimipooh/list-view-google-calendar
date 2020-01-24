@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 5.3
-Stable tag: 5.4
+Stable tag: 5.5
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,9 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+
+= 5.5 = 
+* Fixed the issue that "orderbysort" setting in the admin setting menu isn't applied.
 
 = 5.4 = 
 * Fixed the hook "lvgc_each_output_data" issue.

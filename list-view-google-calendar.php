@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.4
+Version: 5.5
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -52,7 +52,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 540;
+		$this->settings['version'] = 550;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -145,16 +145,16 @@ class gclv extends gclv_hash_tags{
 			'start_date' 	=> '',
 			'end_date'		=> '',
 			'date_format'	=> 'Y.m.d', 
-			'orderbysort'	=> 'descending',// ascending or descending.
+			'orderbysort'	=> '',			// ascending or descending.
 			'g_api_key'		=> '',			// Google Calendar API KEY
 			'g_id'			=> '',			// Google Calendar ID
 			'max_view'		=> '',			// Maximum number of view
 			'max_display'		=> '',		// Maximum number of display
 			'html_tag'		=> '',			// Allow $this->html_tags value.
 			'html_tag_class'	=> '',		// adding a class to html tag (default: $this->plugin_name) 
-			'hook_secret_key' => '',	// If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
-			'lang'			=> '',		// List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1
-			'enable_view_category'	=> '',  // If you want to display the category (#type and #organizer), please set this value to "true" or not empty value. version 3.0
+			'hook_secret_key' => '',		// If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
+			'lang'			=> '',			// List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1
+			'enable_view_category'	=> '',	// If you want to display the category (#type and #organizer), please set this value to "true" or not empty value. version 3.0
 		);
 		if(!empty($atts_special_allow_options)):
 			$atts_options = array_merge($atts_options, $atts_special_allow_options);  // Overwrite the same options.
@@ -163,7 +163,7 @@ class gclv extends gclv_hash_tags{
 
 		$html_tag_class = $html_tag_class ?: $this->plugin_name;
 
-		$settings = get_option($this->set_op);
+		$settings = get_option($this->set_op);	
 		$gc_data = $this->get_google_calendar_contents($atts);
 		// get lang data.
 		$gc_data = $this->get_select_lang_data($gc_data, $atts);
