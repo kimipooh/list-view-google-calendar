@@ -50,6 +50,7 @@ Deactivate the plugin.
 
 = 5.5 = 
 * Fixed the issue that "orderbysort" setting in the admin setting menu isn't applied.
+* Fixed the warnings when some Google calendar values, such as a description, are empty.
 
 = 5.4 = 
 * Fixed the hook "lvgc_each_output_data" issue.

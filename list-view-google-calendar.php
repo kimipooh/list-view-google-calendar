@@ -109,7 +109,7 @@ class gclv extends gclv_hash_tags{
 	// Default: convert to the beginning of the day.
 	public function wp_datetime_converter_setDayTime($format="c", $dateTime,  $flag="start", $timezone_set=""){
 		$timezone_set = $this->wp_datetime_converter_init();
-		if(empty($dateTime)) return $date;
+		if(empty($dateTime)) return $dateTime;
 		if(empty($timezone_set)) return $timezone_set;
 
 		if($dateTime == strtolower("today")):
@@ -200,18 +200,23 @@ class gclv extends gclv_hash_tags{
 
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
-				$gc_link = esc_url($gc_value['htmlLink']);
-				$gc_title = esc_html($gc_value['summary']);
-				$gc_description = $gc_value['description'];
+				$gc_link = "";
+				if(isset($gc_value['htmlLink'])) $gc_link = esc_url($gc_value['htmlLink']);
+				$gc_title = "";
+				if(isset($gc_value['summary'])) $gc_title = esc_html($gc_value['summary']);
+				$gc_description = "";
+				if(isset($gc_value['description'])) $gc_description = $gc_value['description'];
 //				$gc_description = esc_html($gc_value['description']);
 				$plugin_name = $this->plugin_name;
 				$html_tag_class_c = $holding_flag ? $html_tag_class . '_holding' : $html_tag_class;
 
 				// for a hook.
 				$hash_tags = $this->get_hash_tags($gc_value, $atts);
-				$hash_tags_type_title = $hash_tags['type']['title'] ?: "";
-				$hash_tags_organizer_value = $hash_tags['organizer']['value'] ?: "";
-				$hash_tags_organizer_value .= $hash_tags['organizer']['title'] ? ' ' . $hash_tags['organizer']['title'] :  '';
+				$hash_tags_type_title = "";
+				if(isset($hash_tags['type']['title'])) $hash_tags_type_title = $hash_tags['type']['title'];
+				$hash_tags_organizer_value = "";
+				if(isset($hash_tags['organizer']['value'])) $hash_tags_organizer_value = $hash_tags['organizer']['value'];
+				if(isset($hash_tags['organizer']['title'])) $hash_tags_organizer_value .= ' ' . $hash_tags['organizer']['title'];
 				$output_category_temp = '';
 				if(!empty($enable_view_category)):
 					if(!empty($hash_tags_type_title)):
