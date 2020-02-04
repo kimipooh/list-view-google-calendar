@@ -48,6 +48,7 @@ Deactivate the plugin.
 
 == Changelog ==
 = 5.6 = 
+* Tested up WordPress 5.3.2 and php 7.4.1.
 * Fixed warning messages in case that "start_date" and "end_date" shortcode options are not set.
 * Fixed the issue that it referred to Google Calendar even if the default "Google Calendar ID" or "API Key" aren't set. 
 
