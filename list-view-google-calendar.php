@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.5
+Version: 5.6
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -170,6 +170,12 @@ class gclv extends gclv_hash_tags{
 		// Security check for the hook (clean up ALL html tag except description).
 		$gc_data = $this->security_check_array($gc_data);
 
+		if(!isset($settings['google_calendar'])):
+			$settings['google_calendar'] = array();
+		endif;
+		if(!isset($settings['google_calendar']['html_tag'])):
+			$settings['google_calendar']['html_tag'] = "";
+		endif;
 		if(isset($html_tag) && !empty($html_tag)): 
 			$settings['google_calendar']['html_tag'] = wp_strip_all_tags($html_tag);
 			if(!isset($this->html_tags[$settings['google_calendar']['html_tag']])) $settings['google_calendar']['html_tag'] = $this->html_tags[$default_html_tag];
@@ -296,9 +302,21 @@ class gclv extends gclv_hash_tags{
 		if(isset($settings['google_calendar']))
 			$gc = $settings['google_calendar'];
 		// Priority of the attribution value in the shortcode.
-		if(isset($start_date) && !empty($start_date)) $gc['start-date'] = wp_strip_all_tags($start_date);
-		if(isset($end_date) && !empty($end_date)) $gc['end-date'] = wp_strip_all_tags($end_date);
-		if(isset($orderbysort) && !empty($orderbysort)) $gc['orderbysort'] = wp_strip_all_tags($orderbysort);
+		if(isset($start_date) && !empty($start_date)):
+			$gc['start-date'] = wp_strip_all_tags($start_date);
+		else:
+			$gc['start-date'] = '';
+		endif;
+		if(isset($end_date) && !empty($end_date)):
+			$gc['end-date'] = wp_strip_all_tags($end_date);
+		else:
+			$gc['end-date'] = '';
+		endif;
+		if(isset($orderbysort) && !empty($orderbysort)):
+			$gc['orderbysort'] = wp_strip_all_tags($orderbysort);
+		else:
+			$gc['orderbysort'] = $this->google_calendar['orderbysort'];
+		endif;
 		if(isset($g_api_key) && !empty($g_api_key)) $gc['api-key'] = wp_strip_all_tags($g_api_key);
 		if(isset($g_id) && !empty($g_id)) $gc['id'] = wp_strip_all_tags($g_id);
 		if(isset($max_view) && !empty($max_view)):
@@ -324,11 +342,9 @@ class gclv extends gclv_hash_tags{
 				endif;
 			endif;
 		endforeach;
-		
+
 		$g_url = esc_url($gc['api-url']) . wp_strip_all_tags($gc['id']) . '/events?key=' . wp_strip_all_tags($gc['api-key']) . '&singleEvents=true';
 
-		$gc_start_date = $this->wp_datetime_converter_setDayTime("c", $gc['start-date']);
-		$gc_end_date = $this->wp_datetime_converter_setDayTime("c", $gc['end-date']);
 		$today_date = $this->wp_datetime_converter_current_time("c");
 		$today_start_date = $this->wp_datetime_converter_setDayTime("c", "today", "start");
 		$today_end_date = $this->wp_datetime_converter_setDayTime("c", "today", "end");
@@ -346,7 +362,7 @@ class gclv extends gclv_hash_tags{
 				if(strtolower($gc['start-date']) === "now"):
 					$params[] = 'timeMin='.urlencode($today_start_date);
 				else:
-					$params[] = 'timeMin='.urlencode($gc_start_date);
+					$params[] = 'timeMin='.urlencode($this->wp_datetime_converter_setDayTime("c", $gc['start-date']));
 				endif;
 			endif;
 		else:
@@ -357,7 +373,7 @@ class gclv extends gclv_hash_tags{
 				if(strtolower($gc['end-date']) == "now"):
 					$params[] = 'timeMax='.urlencode($today_end_date);
 				else:
-					$params[] = 'timeMax='.urlencode($gc_end_date);
+					$params[] = 'timeMax='.urlencode($this->wp_datetime_converter_setDayTime("c", $gc['end-date']));
 				endif;
 			endif;
 		endif;
@@ -381,11 +397,11 @@ class gclv extends gclv_hash_tags{
 			$urls_results = file_get_contents($value, false, $fgc_context);
 			$urls_json[$key] = $urls_results ? json_decode($urls_results, true) : '';
 		endforeach;
-
-		$results = file_get_contents($url, false, $fgc_context);
-
+		$results  = array();
+		if(isset($gc['id']) && isset($gc['api-key'])):
+			$results = file_get_contents($url, false, $fgc_context);
+		endif;
 		$json = $results ? json_decode($results, true) : '';
-
 		// Merge Events of Multi Galendar
 		if($urls_json && isset($json['items'])):
 			foreach($urls_json as $key=>$value):

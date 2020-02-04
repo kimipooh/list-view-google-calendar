@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Tested up to: 5.3
-Stable tag: 5.5
+Stable tag: 5.6
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,9 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+= 5.6 = 
+* Fixed warning messages in case that "start_date" and "end_date" shortcode options are not set.
+* Fixed the issue that it referred to Google Calendar even if the default "Google Calendar ID" or "API Key" aren't set. 
 
 = 5.5 = 
 * Fixed the issue that "orderbysort" setting in the admin setting menu isn't applied.
