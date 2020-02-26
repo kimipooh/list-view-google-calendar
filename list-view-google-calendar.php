@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.6
+Version: 5.7
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -52,7 +52,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 550;
+		$this->settings['version'] = 570;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -155,6 +155,7 @@ class gclv extends gclv_hash_tags{
 			'hook_secret_key' => '',		// If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
 			'lang'			=> '',			// List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1
 			'enable_view_category'	=> '',	// If you want to display the category (#type and #organizer), please set this value to "true" or not empty value. version 3.0
+			'view_location'	=> '',	// If the value is not empty, the location data is displayed with title.
 		);
 		if(!empty($atts_special_allow_options)):
 			$atts_options = array_merge($atts_options, $atts_special_allow_options);  // Overwrite the same options.
@@ -213,6 +214,8 @@ class gclv extends gclv_hash_tags{
 				$gc_description = "";
 				if(isset($gc_value['description'])) $gc_description = $gc_value['description'];
 //				$gc_description = esc_html($gc_value['description']);
+				$gc_location = "";
+				if(isset($gc_value['location'])) $gc_location = $gc_value['location'];
 				$plugin_name = $this->plugin_name;
 				$html_tag_class_c = $holding_flag ? $html_tag_class . '_holding' : $html_tag_class;
 
@@ -242,6 +245,7 @@ class gclv extends gclv_hash_tags{
 					'gc_link'			=> $gc_link,
 					'gc_title'			=> $gc_title, 
 					'gc_description'	=> $gc_description, 
+					'gc_location'		=> $gc_location, 
 					'plugin_name'		=> $plugin_name,
 					'html_tag_class'	=> $html_tag_class,
 					'html_tag_class_c'	=> $html_tag_class_c,
@@ -447,7 +451,6 @@ class gclv extends gclv_hash_tags{
 				$json['items'] = array_slice($json['items'], 0, (int)$gc['maxResults']);
 			endif;
 		endif;
-		
 		return $json;
 	}
 	public function add_to_settings_menu(){

@@ -3,8 +3,8 @@ Contributors: kimipooh
 Donate link: 
 Tags: Google Calendar
 Requires at least: 4.0
-Tested up to: 5.3
-Stable tag: 5.6
+Tested up to: 5.3.2
+Stable tag: 5.7
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,10 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+= 5.7 = 
+* Added "view_location" shortcode option. If the value is not empty, location data is displayed with the title.
+* Added "$gc_location" variable in the hook.
+
 = 5.6 = 
 * Tested up WordPress 5.3.2 and php 7.4.1.
 * Fixed warning messages in case that "start_date" and "end_date" shortcode options are not set.
