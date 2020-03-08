@@ -3,8 +3,9 @@ Contributors: kimipooh
 Donate link: 
 Tags: Google Calendar
 Requires at least: 4.0
+Requires PHP: 5.6
 Tested up to: 5.3.2
-Stable tag: 5.7
+Stable tag: 5.8
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +48,10 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+= 5.8 = 
+* Added the response of CSRF (Cross-Site Request Forgery) vulnerability for this plugin's settings.
+* Tested up WordPress 5.3.2 and php 7.4.2.
+
 = 5.7 = 
 * Added "view_location" shortcode option. If the value is not empty, location data is displayed with the title.
 * Added "$gc_location" variable in the hook.

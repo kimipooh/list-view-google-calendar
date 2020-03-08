@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.7
+Version: 5.8
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -466,40 +466,45 @@ class gclv extends gclv_hash_tags{
 		endif;
 
 		$google_calendar_flag = false;
-		// GET setting data in Settings.
-		if(isset($_POST['google-calendar-api-key'])):
-			$this->google_calendar['api-key'] =  wp_strip_all_tags($_POST['google-calendar-api-key']);
-			$google_calendar_flag = true;
-		endif;
-		if(isset($_POST['google-calendar-id'])):
-			$this->google_calendar['id'] =  wp_strip_all_tags($_POST['google-calendar-id']);
-			$google_calendar_flag = true;
-		endif;
-		if(isset($_POST['google-calendar-start-date'])):
-			$this->google_calendar['start-date'] =  wp_strip_all_tags($_POST['google-calendar-start-date']);
-			$google_calendar_flag = true;
-		endif;
-		if(isset($_POST['google-calendar-end-date'])):
-			$this->google_calendar['end-date'] =  wp_strip_all_tags($_POST['google-calendar-end-date']);
-			$google_calendar_flag = true;
-		endif;
-		if(isset($_POST['google-calendar-maxResults'])): 
-			// maxResults 
-			if((int)$_POST['google-calendar-maxResults'] > 0 && (int)($_POST['google-calendar-maxResults'] <= 2500)):
-				$this->google_calendar['maxResults'] = (int) wp_strip_all_tags($_POST['google-calendar-maxResults']);
-			else:
-				$this->google_calendar['maxResults'] = $this->default_maxResults;
+		
+		if(isset($_POST["gclv-form"]) && $_POST["gclv-form"]):
+			if(check_admin_referer("gclv-nonce-key", "gclv-form")):
+				// GET setting data in Settings.
+				if(isset($_POST['google-calendar-api-key'])):
+					$this->google_calendar['api-key'] =  wp_strip_all_tags($_POST['google-calendar-api-key']);
+					$google_calendar_flag = true;
+				endif;
+				if(isset($_POST['google-calendar-id'])):
+					$this->google_calendar['id'] =  wp_strip_all_tags($_POST['google-calendar-id']);
+					$google_calendar_flag = true;
+				endif;
+				if(isset($_POST['google-calendar-start-date'])):
+					$this->google_calendar['start-date'] =  wp_strip_all_tags($_POST['google-calendar-start-date']);
+					$google_calendar_flag = true;
+				endif;
+				if(isset($_POST['google-calendar-end-date'])):
+					$this->google_calendar['end-date'] =  wp_strip_all_tags($_POST['google-calendar-end-date']);
+					$google_calendar_flag = true;
+				endif;
+				if(isset($_POST['google-calendar-maxResults'])): 
+					// maxResults 
+					if((int)$_POST['google-calendar-maxResults'] > 0 && (int)($_POST['google-calendar-maxResults'] <= 2500)):
+						$this->google_calendar['maxResults'] = (int) wp_strip_all_tags($_POST['google-calendar-maxResults']);
+					else:
+						$this->google_calendar['maxResults'] = $this->default_maxResults;
+					endif;
+					$google_calendar_flag = true;
+				endif;
+				if(isset($_POST['google-calendar-orderbysort'])):
+					$this->google_calendar['orderbysort'] =  wp_strip_all_tags($_POST['google-calendar-orderbysort']);
+					$google_calendar_flag = true;
+				endif;
+				if(isset($_POST['google-calendar-html_tag'])):
+					$this->google_calendar['html_tag'] =  wp_strip_all_tags($_POST['google-calendar-html_tag'] ? $_POST['google-calendar-html_tag'] : $this->default_html_tag);
+					$google_calendar_flag = true;
+				endif;
 			endif;
-			$google_calendar_flag = true;
 		endif;
-		if(isset($_POST['google-calendar-orderbysort'])):
-			$this->google_calendar['orderbysort'] =  wp_strip_all_tags($_POST['google-calendar-orderbysort']);
-			$google_calendar_flag = true;
-		endif;
-		if(isset($_POST['google-calendar-html_tag'])):
-			$this->google_calendar['html_tag'] =  wp_strip_all_tags($_POST['google-calendar-html_tag'] ? $_POST['google-calendar-html_tag'] : $this->default_html_tag);
-			$google_calendar_flag = true;
-		endif;		
 
 		$settings['google_calendar'] = $this->google_calendar;
 
@@ -511,6 +516,8 @@ class gclv extends gclv_hash_tags{
   <h2><?php _e($this->plugin_title . ' Settings', $this->plugin_name); ?></h2>
   
   <form method="post" action="">
+	<?php // for CSRF (Cross-Site Request Forgery): https://propansystem.net/blog/2018/02/20/post-6279/
+		wp_nonce_field("gclv-nonce-key", "gclv-form"); ?>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
        <legend><h3><?php _e('How to use it.', $this->plugin_name); ?></h3></legend>
        <div style="overflow:noscroll; height: 70px;">
