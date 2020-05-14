@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.8
+Version: 5.9
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -52,7 +52,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 570;
+		$this->settings['version'] = 590;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -208,14 +208,25 @@ class gclv extends gclv_hash_tags{
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 				$gc_link = "";
-				if(isset($gc_value['htmlLink'])) $gc_link = esc_url($gc_value['htmlLink']);
+				if(isset($gc_value['htmlLink'])):
+					$gc_link = esc_url($gc_value['htmlLink']);
+					$gc_value['htmlLink'] = $gc_link;
+				endif;
 				$gc_title = "";
-				if(isset($gc_value['summary'])) $gc_title = esc_html($gc_value['summary']);
+				if(isset($gc_value['summary'])):
+					$gc_title = esc_html($gc_value['summary']);
+					$gc_value['summary'] = $gc_title;
+				endif;
 				$gc_description = "";
-				if(isset($gc_value['description'])) $gc_description = $gc_value['description'];
-//				$gc_description = esc_html($gc_value['description']);
+				if(isset($gc_value['description'])):
+					$gc_description = esc_html($gc_value['description']);
+					$gc_value['description'] = $gc_description;
+				endif;
 				$gc_location = "";
-				if(isset($gc_value['location'])) $gc_location = $gc_value['location'];
+				if(isset($gc_value['location'])):
+					$gc_location = esc_html($gc_value['location']);
+					$gc_value['location'] = $gc_location;
+				endif;
 				$plugin_name = $this->plugin_name;
 				$html_tag_class_c = $holding_flag ? $html_tag_class . '_holding' : $html_tag_class;
 
@@ -259,9 +270,10 @@ class gclv extends gclv_hash_tags{
 				$out_temp = '';
 				if(!empty($html_tag) && file_exists (dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php')):
 					include(dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php');
-				endif; 
-				if(!empty($hook_secret_key)):
-					$out_t = apply_filters( 'lvgc_each_output_data', $out_temp, $out_atts );
+				endif;
+				if(!empty($hook_secret_key)): 
+					// $gc_value components is referred in https://developers.google.com/calendar/v3/reference/events#resource.
+					$out_t = apply_filters( 'lvgc_each_output_data', $out_temp, $out_atts, $gc_value);
 					if(isset($out_t['hook_secret_key']) && $hook_secret_key === $out_t['hook_secret_key']):
 						$out .= wp_kses_post($out_t['data']);
 					else:
