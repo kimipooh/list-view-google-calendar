@@ -4,7 +4,7 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
-Tested up to: 5.4.1
+Tested up to: 5.6
 Stable tag: 5.9
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -50,6 +50,7 @@ Deactivate the plugin.
 == Changelog ==
 = 5.9 = 
 * Added the Google Calendar original values to the "lvgc_each_output_data" hook. The values is referred in https://developers.google.com/calendar/v3/reference/events#resource.
+* Tested up WordPress 5.6 and php 7.4.2.
 
 = 5.8 = 
 * Added the response of CSRF (Cross-Site Request Forgery) vulnerability for this plugin's settings.
