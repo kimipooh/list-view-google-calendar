@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.9
+Version: 5.9.1
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -52,7 +52,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 590;
+		$this->settings['version'] = 591;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -87,7 +87,7 @@ class gclv extends gclv_hash_tags{
 	}		
 		
 	// Get the date time with WordPress timezone.
-	public function wp_datetime_converter_get_date_from_gmt($format="c", $dateTime, $timezone_set=""){
+	public function wp_datetime_converter_get_date_from_gmt($format="c", $dateTime="", $timezone_set=""){
 		$timezone_set = $this->wp_datetime_converter_init();
 		if(empty($dateTime)) return $date;
 		if(empty($timezone_set)) return $timezone_set;
@@ -97,7 +97,7 @@ class gclv extends gclv_hash_tags{
 	}
 
 	// Set the date time with WordPress timezone.
-	public function wp_datetime_converter_setTimeZone($format="c", $dateTime, $timezone_set=""){
+	public function wp_datetime_converter_setTimeZone($format="c", $dateTime="", $timezone_set=""){
 		$timezone_set = $this->wp_datetime_converter_init();
 		if(empty($dateTime)) return $date;
 		if(empty($timezone_set)) return $timezone_set;
@@ -107,7 +107,7 @@ class gclv extends gclv_hash_tags{
 	
 	// Convert time to the beginning of the day or the end of the day with WordPress timezone.
 	// Default: convert to the beginning of the day.
-	public function wp_datetime_converter_setDayTime($format="c", $dateTime,  $flag="start", $timezone_set=""){
+	public function wp_datetime_converter_setDayTime($format="c", $dateTime="",  $flag="start", $timezone_set=""){
 		$timezone_set = $this->wp_datetime_converter_init();
 		if(empty($dateTime)) return $dateTime;
 		if(empty($timezone_set)) return $timezone_set;
@@ -406,7 +406,7 @@ class gclv extends gclv_hash_tags{
 		$fgc_context = stream_context_create(array(
 			 'http' => array('ignore_errors' => true),
 		));
-		
+//		var_dump($url);
 		$urls_json = array();
 		$urls_results = array();
 		foreach($urls as $key=>$value):
