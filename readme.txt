@@ -4,8 +4,8 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
-Tested up to: 5.6.2
-Stable tag: 5.9.1
+Tested up to: 5.7
+Stable tag: 6.0
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,9 @@ Yes. You can set Google Calendar ID and API Key in the shortcode.
 = How to remove the settings =
 Deactivate the plugin.
 
+= How to hide a specific event =
+By setting up hash tag (#display none or #display off) in an event description, so the event isn’t displayed.
+
 == Screenshots ==
 1. List View of a public Google Calendar
 2. How to use the Shortcode
@@ -48,6 +51,12 @@ Deactivate the plugin.
 7. Feature Expansion & Other notice
 
 == Changelog ==
+= 6.0 = 
+* Add the hash tag (#display). by setting up hash tag (#display none or #display off) in an event description, so the event isn’t displayed.
+"lvgc_each_output_data" hook.
+* If there are no events, "there are no events." message is displayed.
+* Tested up WordPress 5.7 and php 8.0.0.
+
 = 5.9.1 = 
 * Fixed the warnings when "WP_DEBUG" is true.
 * Tested up WordPress 5.6.2 and php 8.0.0.

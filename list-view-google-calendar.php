@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 5.9.1
+Version: 6.0
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -185,6 +185,7 @@ class gclv extends gclv_hash_tags{
 		$html_tag = $atts['html_tag'];
 		
 		$out = ''; 
+		$element_count = 0; 
 		$match = array();
 		if( isset($gc_data['items']) ): 
 			foreach($gc_data['items'] as $gc_key=>$gc_value):
@@ -237,6 +238,8 @@ class gclv extends gclv_hash_tags{
 				$hash_tags_organizer_value = "";
 				if(isset($hash_tags['organizer']['value'])) $hash_tags_organizer_value = $hash_tags['organizer']['value'];
 				if(isset($hash_tags['organizer']['title'])) $hash_tags_organizer_value .= ' ' . $hash_tags['organizer']['title'];
+				$hash_tags_display_value = "";
+				if(isset($hash_tags['display']['value'])) $hash_tags_display_value = $hash_tags['display']['value'];
 				$output_category_temp = '';
 				if(!empty($enable_view_category)):
 					if(!empty($hash_tags_type_title)):
@@ -265,9 +268,17 @@ class gclv extends gclv_hash_tags{
 					'hash_tags'			=> $hash_tags,
 					'hash_tags_type_title'	=> $hash_tags_type_title,
 					'hash_tags_organizer_value'	=> $hash_tags_organizer_value,
-					'output_category_temp'	=> $output_category_temp,	
+					'output_category_temp'	=> $output_category_temp,
+					'hash_tags_display_value'	=> $hash_tags_display_value, 
+					'element_count' => $element_count,
 				);
+				// When  $hash_tags_display_value = "none" or "off"  (#display none or #display off   in Description of Google Calendar Event), the event isn't displayed.
+				if($hash_tags_display_value === "none" || $hash_tags_display_value === "off"):
+					continue;
+				endif;
+
 				$out_temp = '';
+				$filter_out_temp = '';
 				if(!empty($html_tag) && file_exists (dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php')):
 					include(dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php');
 				endif;
@@ -275,15 +286,22 @@ class gclv extends gclv_hash_tags{
 					// $gc_value components is referred in https://developers.google.com/calendar/v3/reference/events#resource.
 					$out_t = apply_filters( 'lvgc_each_output_data', $out_temp, $out_atts, $gc_value);
 					if(isset($out_t['hook_secret_key']) && $hook_secret_key === $out_t['hook_secret_key']):
-						$out .= wp_kses_post($out_t['data']);
+						$filter_out_temp = wp_kses_post($out_t['data']);
+						if(!empty($filter_out_temp)):
+							$element_count++;
+							$out .= $filter_out_temp;
+						endif;
 					else:
 						$out .= $out_temp;
 					endif;
 				else:
 					$out .= $out_temp;
-					
 				endif;
 	  		endforeach;
+		endif;
+
+		if(empty($out)):
+			$out = __('There are no events.', $this->plugin_name);
 		endif;
 
 		return $out;
