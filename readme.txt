@@ -53,7 +53,7 @@ By setting up hash tag (#display none or #display off) in an event description, 
 == Changelog ==
 = 6.0 = 
 * Add the hash tag (#display). by setting up hash tag (#display none or #display off) in an event description, so the event isn’t displayed.
-"lvgc_each_output_data" hook.
+* Add the elements of "hash_tags_display_value", "element_count" for "lvgc_each_output_data" hook.
 * If there are no events, "there are no events." message is displayed.
 * Tested up WordPress 5.7 and php 8.0.0.
 
