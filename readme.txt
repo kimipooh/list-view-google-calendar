@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
 Tested up to: 5.7
-Stable tag: 6.0
+Stable tag: 6.1
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,10 @@ Deactivate the plugin.
 = How to hide a specific event =
 By setting up hash tag (#display none or #display off) in an event description, so the event isn’t displayed.
 
+= How to change the message when there are no events =
+You input the message to "No Event Message" item in the general setting of the plugin setting or "no_event_message" shortcode option. 
+If the value is empty, "There are no events." is set. Else if the value is "none", the message is hidden. If "no_event_message" shortcode option is set, the message is overwritten by the shortcode message
+
 == Screenshots ==
 1. List View of a public Google Calendar
 2. How to use the Shortcode
@@ -51,6 +55,9 @@ By setting up hash tag (#display none or #display off) in an event description, 
 7. Feature Expansion & Other notice
 
 == Changelog ==
+= 6.1 = 
+* Added the change of the message to the setting menu and shortcode option when there are no events. If the value is empty, "There are no events." is set. Else if the value is "none", the message is hidden. If "no_event_message" shortcode option is set, the message is overwritten by the shortcode message
+
 = 6.0 = 
 * Add the hash tag (#display). by setting up hash tag (#display none or #display off) in an event description, so the event isn’t displayed.
 * Add the elements of "hash_tags_display_value", "element_count" for "lvgc_each_output_data" hook.

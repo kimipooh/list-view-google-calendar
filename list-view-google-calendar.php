@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.0
+Version: 6.1
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -18,6 +18,7 @@ class gclv extends gclv_hash_tags{
 	var $plugin_title = 'Google Calendar List View';
 	var $plugin_shortcode = 'gc_list_view';
 	var $default_maxResults = 10;  
+	var $default_noEventMessage = "There are no events.";
 	var $html_tags = array('li'=>'li', 'p'=>'p', 'dd'=>'dd', 'lip'=>'lip'); 
 	var $default_html_tag = 'li'; 
 	var $google_calendar = array( 
@@ -29,7 +30,8 @@ class gclv extends gclv_hash_tags{
 		'orderby'		=> 'startTime',			// startTime, updated (only ascending).
 		'orderbysort'	=> 'descending',		// ascending or descending.
 		'maxResults'	=> '',					// Get items <= 2500 (https://developers.google.com/google-apps/calendar/v3/reference/events/list)
-		'html_tag'		=> '',
+		'html_tag'		=> '',	
+		'noEventMessage' =>'',
 	);
 	var $lang_dir = 'lang';	// Language folder name
 	var $settings;
@@ -44,7 +46,6 @@ class gclv extends gclv_hash_tags{
 		add_action('plugins_loaded', array(&$this,'enable_language_translation'));
 		
 		add_shortcode($this->plugin_shortcode, array(&$this, 'shortcodes'));
-
 	}
 	public function enable_language_translation(){
 		load_plugin_textdomain($this->plugin_name)
@@ -52,7 +53,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 591;
+		$this->settings['version'] = 610;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -156,6 +157,7 @@ class gclv extends gclv_hash_tags{
 			'lang'			=> '',			// List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1
 			'enable_view_category'	=> '',	// If you want to display the category (#type and #organizer), please set this value to "true" or not empty value. version 3.0
 			'view_location'	=> '',	// If the value is not empty, the location data is displayed with title.
+			'no_event_message' => '', // When there are no events, this message is displayed priority.
 		);
 		if(!empty($atts_special_allow_options)):
 			$atts_options = array_merge($atts_options, $atts_special_allow_options);  // Overwrite the same options.
@@ -183,8 +185,14 @@ class gclv extends gclv_hash_tags{
 		endif;
 		$atts['html_tag'] = $settings['google_calendar']['html_tag'] ? $settings['google_calendar']['html_tag'] : $this->default_html_tag;
 		$html_tag = $atts['html_tag'];
-		
-		$out = ''; 
+
+		if(isset($no_event_message) && !empty($no_event_message)): 
+				$settings['google_calendar']['noEventMessage'] = wp_strip_all_tags($no_event_message);
+		endif;
+		if(!isset($settings['google_calendar']['noEventMessage'])) $settings['google_calendar']['noEventMessage'] = $this->default_noEventMessage;
+		else if($settings['google_calendar']['noEventMessage'] === "none") $settings['google_calendar']['noEventMessage']  = "";
+
+		$out  = ''; 
 		$element_count = 0; 
 		$match = array();
 		if( isset($gc_data['items']) ): 
@@ -301,7 +309,7 @@ class gclv extends gclv_hash_tags{
 		endif;
 
 		if(empty($out)):
-			$out = __('There are no events.', $this->plugin_name);
+			$out = __($settings['google_calendar']['noEventMessage'], $this->plugin_name);
 		endif;
 
 		return $out;
@@ -486,15 +494,17 @@ class gclv extends gclv_hash_tags{
 	public function add_to_settings_menu(){
 		add_options_page(sprintf(__('%s Settings', $this->plugin_title), $this->plugin_title), sprintf(__('%s Settings', $this->plugin_title), $this->plugin_title), 'manage_options', __FILE__,array(&$this,'admin_settings_page'));
 	}
-	
+
 	// Processing Setting menu for the plugin.
 	public function admin_settings_page(){
 		$settings = get_option($this->set_op);
-		
+
 		if(isset($settings['google_calendar']) && is_array($settings['google_calendar'])):
 			$this->google_calendar = $settings['google_calendar'];
 		endif;
-
+		if(!isset($this->google_calendar['noEventMessage'])):
+			$this->google_calendar['noEventMessage'] = $this->default_noEventMessage;
+		endif;
 		$google_calendar_flag = false;
 		
 		if(isset($_POST["gclv-form"]) && $_POST["gclv-form"]):
@@ -531,6 +541,10 @@ class gclv extends gclv_hash_tags{
 				endif;
 				if(isset($_POST['google-calendar-html_tag'])):
 					$this->google_calendar['html_tag'] =  wp_strip_all_tags($_POST['google-calendar-html_tag'] ? $_POST['google-calendar-html_tag'] : $this->default_html_tag);
+					$google_calendar_flag = true;
+				endif;
+				if(isset($_POST['google-calendar-no-event-message'])):
+					$this->google_calendar['noEventMessage'] =  wp_strip_all_tags($_POST['google-calendar-no-event-message'] ? $_POST['google-calendar-no-event-message'] : $this->default_noEventMessage);
 					$google_calendar_flag = true;
 				endif;
 			endif;
@@ -583,7 +597,7 @@ class gclv extends gclv_hash_tags{
      <br/>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
         <legend><h3><?php _e('General Settings', $this->plugin_name); ?></h3></legend>
-        <div style="overflow:noscroll; height: 180px;">
+        <div style="overflow:noscroll; height: 240px;">
          <br/>
          <table>
            <tr><td><strong>1. <?php _e('Order by Sort: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-orderbysort" type="radio" value="ascending" <?php if(strtolower($this->google_calendar['orderbysort']) !== 'descending') print 'checked';?>/>Ascending <input name="google-calendar-orderbysort" type="radio" value="descending" <?php if(strtolower($this->google_calendar['orderbysort']) === 'descending') print 'checked';?>/>Descending</td></tr>
@@ -591,11 +605,12 @@ class gclv extends gclv_hash_tags{
            <?php foreach($this->html_tags as $html_tag): ?>
            <input name="google-calendar-html_tag" type="radio" value="<?php print esc_attr($html_tag); ?>" <?php if($this->google_calendar['html_tag'] === $html_tag) print 'checked'; elseif(empty($this->google_calendar['html_tag']) && $this->default_html_tag === $html_tag) print 'checked'; ?>/><?php print esc_html('<' . $html_tag . '>');?> 
            <?php endforeach; ?></td></tr>
-
+           <tr><td><strong>3. <?php _e('No Event Message: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-no-event-message" type="text" value="<?php print  esc_attr($this->google_calendar['noEventMessage']);?>" size="60" maxlength="100"/></td></tr>
            <tr><td colspan="2">
               <ol>
                <li><?php _e('Order by Sort behaves like "ordersort" by Google Calendar API v2.', $this->plugin_name); ?></li>
                <li><?php printf(__('HTML tag is used by the output Google Calendar events. The tag class is "%s".', $this->plugin_name), $this->plugin_name); ?></li>
+               <li><?php _e('Change the message when there are no events. If the value is empty, "'. $this->default_noEventMessage .'" is set. Else if the value is "none", the message is hidden. If "no_event_message" shortcode option is set, the message is overwritten by the shortcode message', $this->plugin_name); ?></li>
               </ol>
            </td></tr>
          </table>
