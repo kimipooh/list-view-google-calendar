@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.1
+Version: 6.2
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -53,7 +53,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 610;
+		$this->settings['version'] = 620;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -185,7 +185,9 @@ class gclv extends gclv_hash_tags{
 		endif;
 		$atts['html_tag'] = $settings['google_calendar']['html_tag'] ? $settings['google_calendar']['html_tag'] : $this->default_html_tag;
 		$html_tag = $atts['html_tag'];
-
+		if(isset($orderbysort) && !empty($orderbysort)):
+			$settings['google_calendar']['orderbysort'] = wp_strip_all_tags($orderbysort);
+		endif;
 		if(isset($no_event_message) && !empty($no_event_message)): 
 				$settings['google_calendar']['noEventMessage'] = wp_strip_all_tags($no_event_message);
 		endif;
@@ -335,7 +337,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function get_google_calendar_contents($atts){
 		if($atts) extract($atts = $this->security_check_array($atts));
-		
+
 		// Getting the settings from the setting menu.
 		$settings = get_option($this->set_op);
 
@@ -357,7 +359,10 @@ class gclv extends gclv_hash_tags{
 		if(isset($orderbysort) && !empty($orderbysort)):
 			$gc['orderbysort'] = wp_strip_all_tags($orderbysort);
 		else:
-			$gc['orderbysort'] = $this->google_calendar['orderbysort'];
+			if(isset($gc['orderbysort']) && !empty($gc['orderbysort'])):
+			else:
+				$gc['orderbysort'] = $this->google_calendar['orderbysort'];
+			endif;
 		endif;
 		if(isset($g_api_key) && !empty($g_api_key)) $gc['api-key'] = wp_strip_all_tags($g_api_key);
 		if(isset($g_id) && !empty($g_id)) $gc['id'] = wp_strip_all_tags($g_id);
@@ -506,7 +511,7 @@ class gclv extends gclv_hash_tags{
 			$this->google_calendar['noEventMessage'] = $this->default_noEventMessage;
 		endif;
 		$google_calendar_flag = false;
-		
+
 		if(isset($_POST["gclv-form"]) && $_POST["gclv-form"]):
 			if(check_admin_referer("gclv-nonce-key", "gclv-form")):
 				// GET setting data in Settings.
