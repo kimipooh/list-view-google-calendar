@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
 Tested up to: 5.7
-Stable tag: 6.2
+Stable tag: 6.3
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,11 @@ If the value is empty, "There are no events." is set. Else if the value is "none
 7. Feature Expansion & Other notice
 
 == Changelog ==
+= 6.3 = 
+* Allowed the html tag on "$gc_description" value for the hook.
+* Added title attribute to event links, and added the ability to display excerpt of the event description (maximum: 1024 byes) in tooltips.
+* Added “li2" to the shortcut option "html_tag". "li2" display style is that events that take place on the same day will be shown together. See the plugin library/tags/li2.php for technical details.
+
 = 6.2 = 
 * Fixed the issue where sorting from the setting menu was not available.
 

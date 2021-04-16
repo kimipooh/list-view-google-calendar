@@ -11,8 +11,10 @@ if(!empty($enable_view_category)):
 	endif;
 endif;
 
+
+
 $out_temp = <<< ___EOF___
- <li class='${html_tag_class}_item'><p class='${html_tag_class}_date'>$start_date_value</p>$output_category_temp<a target="_blank" class='${html_tag_class}_link' href='$gc_link'>$gc_title</a>
+ <li class='${html_tag_class}_item'><p class='${html_tag_class}_date'>$start_date_value</p>$output_category_temp<a target="_blank" class='${html_tag_class}_link' href='$gc_link' title="$gc_description_br">$gc_title</a>
  
 ___EOF___;
 
@@ -27,3 +29,4 @@ $out_temp .= <<< ___EOF___
 </li>
 
 ___EOF___;
+

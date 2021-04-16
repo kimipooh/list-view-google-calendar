@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.2
+Version: 6.3
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -19,7 +19,7 @@ class gclv extends gclv_hash_tags{
 	var $plugin_shortcode = 'gc_list_view';
 	var $default_maxResults = 10;  
 	var $default_noEventMessage = "There are no events.";
-	var $html_tags = array('li'=>'li', 'p'=>'p', 'dd'=>'dd', 'lip'=>'lip'); 
+	var $html_tags = array('li'=>'li', 'p'=>'p', 'dd'=>'dd', 'lip'=>'lip', 'li2'=>'li2'); 
 	var $default_html_tag = 'li'; 
 	var $google_calendar = array( 
 		'api-key'		=> '',
@@ -53,7 +53,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 620;
+		$this->settings['version'] = 630;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -230,7 +230,7 @@ class gclv extends gclv_hash_tags{
 				endif;
 				$gc_description = "";
 				if(isset($gc_value['description'])):
-					$gc_description = esc_html($gc_value['description']);
+					$gc_description = wp_kses_post($gc_value['description']);
 					$gc_value['description'] = $gc_description;
 				endif;
 				$gc_location = "";
@@ -287,6 +287,24 @@ class gclv extends gclv_hash_tags{
 					continue;
 				endif;
 
+				// For title attribution
+				$gc_description_br = "";
+				if( isset($gc_description) && !empty($gc_description) ): 
+					// &#13;&#10;  is the HTML-encodeing CR+LF (line feed).
+					$gc_description_br = str_replace("<br/>", '&#13;&#10;', $gc_description);
+					$gc_description_br = str_replace("<br>", '&#13;&#10;', $gc_description_br);
+					$gc_description_br = str_replace("<p>", '&#13;&#10;', $gc_description_br);
+					$gc_description_br = str_replace("</p>", '&#13;&#10;', $gc_description_br);
+					$gc_description_br = strip_tags($gc_description_br);
+					$gc_description_br = str_replace('&#13;&#10;&#13;&#10;&#13;&#10;', '&#13;&#10;', $gc_description_br);
+					// Limit the output to the title attribute to 1024 bytes.
+					if( function_exists("mb_strcut") ):
+						$gc_description_br = mb_strcut($gc_description_br, 0, 1024);
+					else:
+						$gc_description_br = substr($gc_description_br, 0, 1024);
+					endif;	
+				endif;
+				
 				$out_temp = '';
 				$filter_out_temp = '';
 				if(!empty($html_tag) && file_exists (dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php')):
@@ -307,6 +325,7 @@ class gclv extends gclv_hash_tags{
 				else:
 					$out .= $out_temp;
 				endif;
+				$pre_start_date_value = $start_date_value;
 	  		endforeach;
 		endif;
 
