@@ -25,6 +25,10 @@ Please see the [documentation](https://info.cseas.kyoto-u.ac.jp/en/links-en/plug
 2. Activate the plugin in your WordPress admin panel.
 
 == Frequently Asked Questions ==
+= What can you do with a hook? =
+You can customize the display of events.
+The styles provided by the plugin are available in the library/tags folder of the plugin. For details, please see the [documentation](https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view) in detail. [Japanese documentation](https://info.cseas.kyoto-u.ac.jp/links-ja/plugin-ja/wordpress-dev-info/google-calendar-list-view)
+
 = How to get past events. =
 Please set up "ALL" or past date to "Start Date" in the setting menu.
 Default setting is to get from now to future events.

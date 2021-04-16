@@ -281,6 +281,7 @@ class gclv extends gclv_hash_tags{
 					'output_category_temp'	=> $output_category_temp,
 					'hash_tags_display_value'	=> $hash_tags_display_value, 
 					'element_count' => $element_count,
+					'gc_description_title' => '',
 				);
 				// When  $hash_tags_display_value = "none" or "off"  (#display none or #display off   in Description of Google Calendar Event), the event isn't displayed.
 				if($hash_tags_display_value === "none" || $hash_tags_display_value === "off"):
@@ -288,22 +289,23 @@ class gclv extends gclv_hash_tags{
 				endif;
 
 				// For title attribution
-				$gc_description_br = "";
+				$gc_description_title = "";
 				if( isset($gc_description) && !empty($gc_description) ): 
 					// &#13;&#10;  is the HTML-encodeing CR+LF (line feed).
-					$gc_description_br = str_replace("<br/>", '&#13;&#10;', $gc_description);
-					$gc_description_br = str_replace("<br>", '&#13;&#10;', $gc_description_br);
-					$gc_description_br = str_replace("<p>", '&#13;&#10;', $gc_description_br);
-					$gc_description_br = str_replace("</p>", '&#13;&#10;', $gc_description_br);
-					$gc_description_br = strip_tags($gc_description_br);
-					$gc_description_br = str_replace('&#13;&#10;&#13;&#10;&#13;&#10;', '&#13;&#10;', $gc_description_br);
+					$gc_description_title = str_replace("<br/>", '&#13;&#10;', $gc_description);
+					$gc_description_title = str_replace("<br>", '&#13;&#10;', $gc_description_title);
+					$gc_description_title = str_replace("<p>", '&#13;&#10;', $gc_description_title);
+					$gc_description_title = str_replace("</p>", '&#13;&#10;', $gc_description_title);
+					$gc_description_title = strip_tags($gc_description_title);
+					$gc_description_title = str_replace('&#13;&#10;&#13;&#10;&#13;&#10;', '&#13;&#10;', $gc_description_title);
 					// Limit the output to the title attribute to 1024 bytes.
 					if( function_exists("mb_strcut") ):
-						$gc_description_br = mb_strcut($gc_description_br, 0, 1024);
+						$gc_description_title = mb_strcut($gc_description_title, 0, 1024);
 					else:
-						$gc_description_br = substr($gc_description_br, 0, 1024);
+						$gc_description_title = substr($gc_description_title, 0, 1024);
 					endif;	
 				endif;
+				$out_atts['gc_description_title'] = $gc_description_title;
 				
 				$out_temp = '';
 				$filter_out_temp = '';
