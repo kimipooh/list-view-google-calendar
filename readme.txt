@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
 Tested up to: 5.7
-Stable tag: 6.4
+Stable tag: 6.4.1
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,6 +59,9 @@ If the value is empty, "There are no events." is set. Else if the value is "none
 7. Feature Expansion & Other notice
 
 == Changelog ==
+= 6.4.1 =
+* The translation of the location name is fixed to be valid. As a result, the default value of the view_location_name shortcut option is now empty. If it is set to empty, Location: will be used.
+
 = 6.4 =
 * If the view_location option is enabled, the location name changed from “Venue:” to “Location:”.
 * Added the "view_location_name" shortcode option. If you change the location name that is displayed when the view_location option is enabled , set the option. 
