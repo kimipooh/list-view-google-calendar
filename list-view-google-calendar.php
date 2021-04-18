@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.3
+Version: 6.4
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -53,7 +53,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 630;
+		$this->settings['version'] = 640;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -158,6 +158,7 @@ class gclv extends gclv_hash_tags{
 			'enable_view_category'	=> '',	// If you want to display the category (#type and #organizer), please set this value to "true" or not empty value. version 3.0
 			'view_location'	=> '',	// If the value is not empty, the location data is displayed with title.
 			'no_event_message' => '', // When there are no events, this message is displayed priority.
+			'view_location_name' =>'Location:', // If the view_location option is enabled, this value is set as the title of the item.
 		);
 		if(!empty($atts_special_allow_options)):
 			$atts_options = array_merge($atts_options, $atts_special_allow_options);  // Overwrite the same options.
@@ -282,6 +283,7 @@ class gclv extends gclv_hash_tags{
 					'hash_tags_display_value'	=> $hash_tags_display_value, 
 					'element_count' => $element_count,
 					'gc_description_title' => '',
+					'view_location_name'=>$view_location_name,
 				);
 				// When  $hash_tags_display_value = "none" or "off"  (#display none or #display off   in Description of Google Calendar Event), the event isn't displayed.
 				if($hash_tags_display_value === "none" || $hash_tags_display_value === "off"):

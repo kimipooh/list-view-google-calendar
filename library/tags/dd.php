@@ -5,7 +5,7 @@ $out_temp = <<< ___EOF___
 ___EOF___;
 
 if ( isset($view_location) && !empty($view_location) ):
-    $location_header_name = __('Venue:', $this->plugin_name);
+    $location_header_name = __($view_location_name, $this->plugin_name);
     $out_temp .= <<< ___EOF___
 <br/><span class='${html_tag_class}_location_head'>$location_header_name</span> <span class='${html_tag_class}_location'>$gc_location</span>
 ___EOF___;
