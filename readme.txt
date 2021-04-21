@@ -61,7 +61,7 @@ If the value is empty, "There are no events." is set. Else if the value is "none
 == Changelog ==
 = 6.5 =
 * Fixed an error that occurred when "html_tag" shortcode option contained an unexpected value.
-* Added "no_event_link" shortcode opition. If the "no_event_link" option is enabled and the value isn't empty, the event link is removed.
+* Added "no_event_link" shortcode option. If the "no_event_link" option is enabled and the value isn't empty, the event link is removed.
 
 = 6.4.1 =
 * The translation of the location name is fixed to be valid. As a result, the default value of the view_location_name shortcut option is now empty. If it is set to empty, Location: will be used.
