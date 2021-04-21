@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.4.1
+Version: 6.5
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -53,7 +53,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 640;
+		$this->settings['version'] = 650;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -159,6 +159,7 @@ class gclv extends gclv_hash_tags{
 			'view_location'	=> '',	// If the value is not empty, the location data is displayed with title.
 			'no_event_message' => '', // When there are no events, this message is displayed priority.
 			'view_location_name' =>'', // If the view_location option is enabled, this value is set as the title of the item.
+			'no_event_link' => '', // If the no_event_link value isn't empty, the event link is removed.
 		);
 		if(!empty($atts_special_allow_options)):
 			$atts_options = array_merge($atts_options, $atts_special_allow_options);  // Overwrite the same options.
@@ -182,7 +183,7 @@ class gclv extends gclv_hash_tags{
 		endif;
 		if(isset($html_tag) && !empty($html_tag)): 
 			$settings['google_calendar']['html_tag'] = wp_strip_all_tags($html_tag);
-			if(!isset($this->html_tags[$settings['google_calendar']['html_tag']])) $settings['google_calendar']['html_tag'] = $this->html_tags[$default_html_tag];
+			if(!isset($this->html_tags[$settings['google_calendar']['html_tag']])) $settings['google_calendar']['html_tag'] = $this->html_tags[$this->default_html_tag];
 		endif;
 		$atts['html_tag'] = $settings['google_calendar']['html_tag'] ? $settings['google_calendar']['html_tag'] : $this->default_html_tag;
 		$html_tag = $atts['html_tag'];
@@ -284,6 +285,7 @@ class gclv extends gclv_hash_tags{
 					'element_count' => $element_count,
 					'gc_description_title' => '',
 					'view_location_name'=>$view_location_name,
+					'no_event_link'=>$no_event_link,
 				);
 				// When  $hash_tags_display_value = "none" or "off"  (#display none or #display off   in Description of Google Calendar Event), the event isn't displayed.
 				if($hash_tags_display_value === "none" || $hash_tags_display_value === "off"):
@@ -294,10 +296,10 @@ class gclv extends gclv_hash_tags{
 				$gc_description_title = "";
 				if( isset($gc_description) && !empty($gc_description) ): 
 					// &#13;&#10;  is the HTML-encodeing CR+LF (line feed).
-					$gc_description_title = str_replace("<br/>", '&#13;&#10;', $gc_description);
-					$gc_description_title = str_replace("<br>", '&#13;&#10;', $gc_description_title);
-					$gc_description_title = str_replace("<p>", '&#13;&#10;', $gc_description_title);
-					$gc_description_title = str_replace("</p>", '&#13;&#10;', $gc_description_title);
+					$gc_description_title = str_replace(array("\r\n", "\r", "\n"), "<br />", $gc_description);
+					$gc_description_title = str_replace(
+						array("<br/>","<br />", "<br>", "<p>", "</p>"),
+						 '&#13;&#10;', $gc_description_title);
 					$gc_description_title = strip_tags($gc_description_title);
 					$gc_description_title = str_replace('&#13;&#10;&#13;&#10;&#13;&#10;', '&#13;&#10;', $gc_description_title);
 					// Limit the output to the title attribute to 1024 bytes.
