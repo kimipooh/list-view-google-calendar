@@ -4,8 +4,8 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
-Tested up to: 5.7
-Stable tag: 6.5
+Tested up to: 5.7.1
+Stable tag: 6.5.1
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,6 +59,9 @@ If the value is empty, "There are no events." is set. Else if the value is "none
 7. Feature Expansion & Other notice
 
 == Changelog ==
+= 6.5.1 =
+* Fixed an issue where template "li2" in "html_tag" shortcode option cannot be used.
+
 = 6.5 =
 * Fixed an error that occurred when "html_tag" shortcode option contained an unexpected value.
 * Added "no_event_link" shortcode option. If the "no_event_link" option is enabled and the value isn't empty, the event link is removed.
