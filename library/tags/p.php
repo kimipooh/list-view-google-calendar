@@ -11,6 +11,8 @@ else:
 
 $out_temp = <<< ___EOF___
  <p class='${html_tag_class}_item'><span class='${html_tag_class}_date'>$start_date_value</span> $output_category_temp <a target="_blank" class='${html_tag_class}_link' href='$gc_link' title="$gc_description_title">$gc_title</a>
+
+___EOF___;
  
 endif;
 
