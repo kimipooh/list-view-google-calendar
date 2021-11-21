@@ -4,8 +4,8 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
-Tested up to: 5.8
-Stable tag: 6.5.2
+Tested up to: 5.8.2
+Stable tag: 6.6
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,9 @@ By setting up hash tag (#display none or #display off) in an event description, 
 You input the message to "No Event Message" item in the general setting of the plugin setting or "no_event_message" shortcode option. 
 If the value is empty, "There are no events." is set. Else if the value is "none", the message is hidden. If "no_event_message" shortcode option is set, the message is overwritten by the shortcode message
 
+= How to manually fix timezone related deviations =
+Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezone Offset” in this plugin setting menu.
+
 == Screenshots ==
 1. List View of a public Google Calendar
 2. How to use the Shortcode
@@ -59,6 +62,10 @@ If the value is empty, "There are no events." is set. Else if the value is "none
 7. Feature Expansion & Other notice
 
 == Changelog ==
+= 6.6 =
+* Add the function to shift the hours, minutes, and seconds by setting the value of "Fix Timezone Offset” in this plugin setting menu if it cannot solve the timezone issue.
+* Change datetime function instead of strtotime to support the year 2038 issue regarding some date processing.
+
 = 6.5.2 =
 * Fixed an issue when template "p" in "html_tag" shortcode option is used.
 * Tested up WordPress 5.8 and php 8.0.0.

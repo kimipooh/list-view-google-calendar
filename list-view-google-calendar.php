@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.5.2
+Version: 6.6
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -19,6 +19,7 @@ class gclv extends gclv_hash_tags{
 	var $plugin_shortcode = 'gc_list_view';
 	var $default_maxResults = 10;  
 	var $default_noEventMessage = "There are no events.";
+	var $default_fix_timezone_offset = ""; // Corrected values for time zone deviations
 	var $html_tags = array('li'=>'li', 'p'=>'p', 'dd'=>'dd', 'lip'=>'lip', 'li2'=>'li2'); 
 	var $default_html_tag = 'li'; 
 	var $google_calendar = array( 
@@ -32,6 +33,7 @@ class gclv extends gclv_hash_tags{
 		'maxResults'	=> '',					// Get items <= 2500 (https://developers.google.com/google-apps/calendar/v3/reference/events/list)
 		'html_tag'		=> '',	
 		'noEventMessage' =>'',
+		'fix-timezone-offset' => '',  // Corrected values for time zone deviations
 	);
 	var $lang_dir = 'lang';	// Language folder name
 	var $settings;
@@ -84,6 +86,15 @@ class gclv extends gclv_hash_tags{
 	public function wp_datetime_converter_current_time($format="c"){
 		$timezone_set = $this->wp_datetime_converter_init();
 		$date_obj = new DateTime('', new DateTimeZone($timezone_set)); // get UTC time.
+		$settings = get_option($this->set_op);
+		if(isset($settings['google_calendar']) && is_array($settings['google_calendar'])):
+			$this->google_calendar = $settings['google_calendar'];
+		endif;
+		if(isset($this->google_calendar['fix-timezone-offset']) && !empty($this->google_calendar['fix-timezone-offset'])):
+			if(@DateInterval::createFromDateString($this->google_calendar['fix-timezone-offset'])):
+				$date_obj->modify($this->google_calendar['fix-timezone-offset']);
+			endif;
+		endif;		
 		return $date_obj->format($format);
 	}		
 		
@@ -92,8 +103,17 @@ class gclv extends gclv_hash_tags{
 		$timezone_set = $this->wp_datetime_converter_init();
 		if(empty($dateTime)) return $date;
 		if(empty($timezone_set)) return $timezone_set;
-		$date_obj = new DateTime(date('Y-m-d H:i:s', strtotime($dateTime))); // UTC timezone
+		$date_obj = new DateTime($dateTime); // UTC timezone
 		$date_obj->setTimezone(new DateTimeZone($timezone_set)); // Set timezone.
+		$settings = get_option($this->set_op);
+		if(isset($settings['google_calendar']) && is_array($settings['google_calendar'])):
+			$this->google_calendar = $settings['google_calendar'];
+		endif;
+		if(isset($this->google_calendar['fix-timezone-offset']) && !empty($this->google_calendar['fix-timezone-offset'])):
+			if(@DateInterval::createFromDateString($this->google_calendar['fix-timezone-offset'])):
+				$date_obj->modify($this->google_calendar['fix-timezone-offset']);
+			endif;
+		endif;		
 		return $date_obj->format($format);
 	}
 
@@ -102,7 +122,16 @@ class gclv extends gclv_hash_tags{
 		$timezone_set = $this->wp_datetime_converter_init();
 		if(empty($dateTime)) return $date;
 		if(empty($timezone_set)) return $timezone_set;
-		$date_obj = new DateTime(date('Y-m-d H:i:s', strtotime($dateTime)), new DateTimeZone($timezone_set)); // Set timezone.
+		$date_obj = new DateTime($dateTime, new DateTimeZone($timezone_set)); // Set timezone.
+		$settings = get_option($this->set_op);
+		if(isset($settings['google_calendar']) && is_array($settings['google_calendar'])):
+			$this->google_calendar = $settings['google_calendar'];
+		endif;
+		if(isset($this->google_calendar['fix-timezone-offset']) && !empty($this->google_calendar['fix-timezone-offset'])):
+			if(@DateInterval::createFromDateString($this->google_calendar['fix-timezone-offset'])):
+				$date_obj->modify($this->google_calendar['fix-timezone-offset']);
+			endif;
+		endif;		
 		return $date_obj->format($format);
 	}
 	
@@ -116,7 +145,7 @@ class gclv extends gclv_hash_tags{
 		if($dateTime == strtolower("today")):
 			$date_obj = new DateTime('', new DateTimeZone($timezone_set)); // Set timezone.
 		else:
-			$date_obj = new DateTime(date('Y-m-d H:i:s', strtotime($dateTime)), new DateTimeZone($timezone_set)); // Set timezone.
+			$date_obj = new DateTime($dateTime, new DateTimeZone($timezone_set)); // Set timezone.
 		endif;
 		if($flag == strtolower("start")):
 			$date_num = mktime(0,0,0,$date_obj->format("m"), $date_obj->format("d"), $date_obj->format("Y"));
@@ -125,6 +154,15 @@ class gclv extends gclv_hash_tags{
 		endif;
 		$date_obj = new DateTime(date('Y-m-d H:i:s', $date_num), new DateTimeZone($timezone_set));
 		
+		$settings = get_option($this->set_op);
+		if(isset($settings['google_calendar']) && is_array($settings['google_calendar'])):
+			$this->google_calendar = $settings['google_calendar'];
+		endif;
+		if(isset($this->google_calendar['fix-timezone-offset']) && !empty($this->google_calendar['fix-timezone-offset'])):
+			if(@DateInterval::createFromDateString($this->google_calendar['fix-timezone-offset'])):
+				$date_obj->modify($this->google_calendar['fix-timezone-offset']);
+			endif;
+		endif;		
 		return $date_obj->format($format);
 	}
 
@@ -195,6 +233,12 @@ class gclv extends gclv_hash_tags{
 		endif;
 		if(!isset($settings['google_calendar']['noEventMessage'])) $settings['google_calendar']['noEventMessage'] = $this->default_noEventMessage;
 		else if($settings['google_calendar']['noEventMessage'] === "none") $settings['google_calendar']['noEventMessage']  = "";
+		if(isset($fix_timezone_offset) && !empty($fix_timezone_offset)): 
+				$settings['google_calendar']['fix-timezone-offset'] = wp_strip_all_tags($fix_timezone_offset);
+		endif;
+		if(!isset($settings['google_calendar']['fix-timezone-offset'])):
+			$settings['google_calendar']['fix-timezone-offset'] = $this->default_fix_timezone_offset;
+		endif;
 
 		$out  = ''; 
 		$element_count = 0; 
@@ -535,6 +579,9 @@ class gclv extends gclv_hash_tags{
 		if(!isset($this->google_calendar['noEventMessage'])):
 			$this->google_calendar['noEventMessage'] = $this->default_noEventMessage;
 		endif;
+		if(!isset($this->google_calendar['fix-timezone-offset'])):
+			$this->google_calendar['fix-timezone-offset'] = $this->default_fix_timezone_offset;
+		endif;
 		$google_calendar_flag = false;
 
 		if(isset($_POST["gclv-form"]) && $_POST["gclv-form"]):
@@ -577,6 +624,10 @@ class gclv extends gclv_hash_tags{
 					$this->google_calendar['noEventMessage'] =  wp_strip_all_tags($_POST['google-calendar-no-event-message'] ? $_POST['google-calendar-no-event-message'] : $this->default_noEventMessage);
 					$google_calendar_flag = true;
 				endif;
+				if(isset($_POST['google-calendar-fix-timezone-offset'])):
+					$this->google_calendar['fix-timezone-offset'] =  wp_strip_all_tags($_POST['google-calendar-fix-timezone-offset'] ? $_POST['google-calendar-fix-timezone-offset'] : $this->default_fix_timezone_offset);
+					$google_calendar_flag = true;
+				endif;
 			endif;
 		endif;
 
@@ -602,20 +653,20 @@ class gclv extends gclv_hash_tags{
      <br/>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
         <legend><h3><?php _e('Google Calendar API Settings', $this->plugin_name); ?></h3></legend>
-        <div style="overflow:noscroll; height: 520px;">
+        <div style="overflow:noscroll; height: 550px;">
          <br/>
          <table>
             <tr><td><strong>1. <?php _e('Google Calendar API Key: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-api-key" type="text" value="<?php print esc_attr($this->google_calendar['api-key']);?>" size="60" maxlength="100"/> </td></tr>
             <tr><td><strong>2. <?php _e('Google Calendar ID: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-id" type="text" value="<?php print esc_attr($this->google_calendar['id']);?>" size="60" maxlength="100"/></td></tr>
-            <tr><td><strong>3. <?php _e('Start Date (YYYY-MM-DD/ALL): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-start-date" type="text" value="<?php print esc_attr($this->google_calendar['start-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?></td></tr>
-            <tr><td><strong>4. <?php _e('End Date (YYYY-MM-DD): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-end-date" type="text" value="<?php print esc_attr($this->google_calendar['end-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> date format is supported.)', $this->plugin_name); ?></td></tr>
+            <tr><td><strong>3. <?php _e('Start Date (YYYY-MM-DD/ALL): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-start-date" type="text" value="<?php print esc_attr($this->google_calendar['start-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a> date format is supported.)', $this->plugin_name); ?></td></tr>
+            <tr><td><strong>4. <?php _e('End Date (YYYY-MM-DD): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-end-date" type="text" value="<?php print esc_attr($this->google_calendar['end-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a> date format is supported.)', $this->plugin_name); ?></td></tr>
             <tr><td><strong>5. <?php _e('maxResults (Default value is 10): ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-maxResults" type="text" value="<?php print esc_attr($this->google_calendar['maxResults'] ? $this->google_calendar['maxResults'] : $this->default_maxResults);?>" size="30" maxlength="100"/> <?php _e('(0 > maxResults <= 2500 | <a href="https://developers.google.com/google-apps/calendar/v3/reference/events/list" target="_blank">Events: list</a>)', $this->plugin_name); ?></td></tr>
             <tr><td colspan="2">
              <ol>
                <li><?php _e('Get Google Calendar API Key from <a href="https://console.developers.google.com/" target="_blank">Google Developer Console</a> (Reference: <a href="https://docs.simplecalendar.io/google-api-key/?utm_source=inside-plugin&utm_medium=link&utm_campaign=core-plugin&utm_content=settings-link" target="_blank">Creating Google API Key</a> by Simple Calendar Documentation)', $this->plugin_name); ?></li>
                <li><?php _e('Get Google Calendar ID from a public Google Calendar setting (Reference: <a href="https://docs.simplecalendar.io/find-google-calendar-id/" target="_blank">Finding Your Google Calendar ID</a> by Simple Calendar Documentation', $this->plugin_name); ?></li>
                <li><?php _e('If "Start Date" or "End Date" are setting up, get Google Calendar events from "Start Date" to "End Date".', $this->plugin_name); ?> <?php _e('Default value is empty (start_date value = current date).', $this->plugin_name); ?></li>
-               <li><?php _e('"Start Date" and "End Date" can use the value of "now" and "ALL". "now" means current date. "ALL" means unlimited.', $this->plugin_name); ?> <?php _e('"Start Date" and "End Date" can use <a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> data format. "-2 days" means 2 days ago from current time. "+1 days" means 1 day later from current time. In detail, please see <a href="http://php.net/manual/en/function.strtotime.php" target="_blank">strtotime</a> help.', $this->plugin_name); ?></li>
+               <li><?php _e('"Start Date" and "End Date" can use the value of "now" and "ALL". "now" means current date. "ALL" means unlimited.', $this->plugin_name); ?> <?php _e('"Start Date" and "End Date" can use <a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a> data format. "-2 days" means 2 days ago from current time. "+1 days" means 1 day later from current time. In detail, please see <a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a> help.', $this->plugin_name); ?></li>
                <li><?php _e('maxResults is maximum number of events returned on one result page. If multiple calendars are specified, this plugin gets maxResults number of events from each calendars and sort by order into them. And then, it picks up maxResults number of latest events from sorted events. (ex. maxResults = 10, Calendar A/B. It gets total 20 events from Calendar A (10 events) and Calendar B(10 events) and 20 events are sorted by order, and then picked up latest 10 events).', $this->plugin_name); ?></li>
              </ol>
             </td></tr>
@@ -627,7 +678,7 @@ class gclv extends gclv_hash_tags{
      <br/>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
         <legend><h3><?php _e('General Settings', $this->plugin_name); ?></h3></legend>
-        <div style="overflow:noscroll; height: 240px;">
+        <div style="overflow:noscroll; height: 450px;">
          <br/>
          <table>
            <tr><td><strong>1. <?php _e('Order by Sort: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-orderbysort" type="radio" value="ascending" <?php if(strtolower($this->google_calendar['orderbysort']) !== 'descending') print 'checked';?>/>Ascending <input name="google-calendar-orderbysort" type="radio" value="descending" <?php if(strtolower($this->google_calendar['orderbysort']) === 'descending') print 'checked';?>/>Descending</td></tr>
@@ -636,11 +687,20 @@ class gclv extends gclv_hash_tags{
            <input name="google-calendar-html_tag" type="radio" value="<?php print esc_attr($html_tag); ?>" <?php if($this->google_calendar['html_tag'] === $html_tag) print 'checked'; elseif(empty($this->google_calendar['html_tag']) && $this->default_html_tag === $html_tag) print 'checked'; ?>/><?php print esc_html('<' . $html_tag . '>');?> 
            <?php endforeach; ?></td></tr>
            <tr><td><strong>3. <?php _e('No Event Message: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-no-event-message" type="text" value="<?php print  esc_attr($this->google_calendar['noEventMessage']);?>" size="60" maxlength="100"/></td></tr>
+           <tr><td><strong>4. <?php _e('Fix Timezone Offset: ', $this->plugin_name); ?></strong></td><td><input name="google-calendar-fix-timezone-offset" type="text" value="<?php print  esc_attr($this->google_calendar['fix-timezone-offset']);?>" size="60" maxlength="100"/ placeholder="ex. +3 hours +10 minutes -30 seconds(default is empty value)"></td></tr>
            <tr><td colspan="2">
               <ol>
                <li><?php _e('Order by Sort behaves like "ordersort" by Google Calendar API v2.', $this->plugin_name); ?></li>
                <li><?php printf(__('HTML tag is used by the output Google Calendar events. The tag class is "%s".', $this->plugin_name), $this->plugin_name); ?></li>
                <li><?php _e('Change the message when there are no events. If the value is empty, "'. $this->default_noEventMessage .'" is set. Else if the value is "none", the message is hidden. If "no_event_message" shortcode option is set, the message is overwritten by the shortcode message', $this->plugin_name); ?></li>
+               <li><?php _e('If you cannot solve the timezone issue, you can manually shift the hours, minutes, and seconds by setting the value of "Fix Timezone Offset".', $this->plugin_name); ?>
+               <?php _e('<br/>For example<br/>
+<ul>
+<li>+3 hours = 3 hours later</li>
+<li>+10 minutes = 10 minutes later</li>
+<li>-30 seconds = 30 seconds before</li>
+</ul>
+Multiple settings can be made by separating them with spaces. hours/minutes/seconds can be singular or plural. In detail, please see <a href="https://www.php.net/manual/en/datetime.modify.php" target="_blank">date_modity</a>.', $this->plugin_name); ?></li>
               </ol>
            </td></tr>
          </table>
