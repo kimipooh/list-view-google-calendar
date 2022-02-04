@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.6
+Version: 6.7
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -20,7 +20,7 @@ class gclv extends gclv_hash_tags{
 	var $default_maxResults = 10;  
 	var $default_noEventMessage = "There are no events.";
 	var $default_fix_timezone_offset = ""; // Corrected values for time zone deviations
-	var $html_tags = array('li'=>'li', 'p'=>'p', 'dd'=>'dd', 'lip'=>'lip', 'li2'=>'li2'); 
+	var $html_tags = array('li'=>'li', 'p'=>'p', 'dd'=>'dd', 'lip'=>'lip', 'li2'=>'li2', 'li-month'=>'li-month'); 
 	var $default_html_tag = 'li'; 
 	var $google_calendar = array( 
 		'api-key'		=> '',
@@ -55,7 +55,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 652;
+		$this->settings['version'] = 670;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -329,7 +329,7 @@ class gclv extends gclv_hash_tags{
 					'element_count' => $element_count,
 					'gc_description_title' => '',
 					'view_location_name'=>$view_location_name,
-					'no_event_link'=>$no_event_link,
+					'no_event_link'=>$no_event_link
 				);
 				// When  $hash_tags_display_value = "none" or "off"  (#display none or #display off   in Description of Google Calendar Event), the event isn't displayed.
 				if($hash_tags_display_value === "none" || $hash_tags_display_value === "off"):
@@ -376,6 +376,7 @@ class gclv extends gclv_hash_tags{
 					$out .= $out_temp;
 				endif;
 				$pre_start_date_value = $start_date_value;
+				$pre_start_dateTime = $dateTime;
 	  		endforeach;
 		endif;
 
@@ -383,6 +384,10 @@ class gclv extends gclv_hash_tags{
 			$out = __($settings['google_calendar']['noEventMessage'], $this->plugin_name);
 		endif;
 
+		if ( preg_match('/-month$/', $html_tag) ):
+			$out .= '</ul>';
+		endif;
+		
 		return $out;
 	}
 	

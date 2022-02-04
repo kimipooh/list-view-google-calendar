@@ -4,8 +4,8 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
-Tested up to: 5.8.2
-Stable tag: 6.6
+Tested up to: 5.9
+Stable tag: 6.7
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,8 +60,12 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 5. Goolge Calendar API Settings
 6. General Settngs
 7. Feature Expansion & Other notice
+8. Grouping events by month
 
 == Changelog ==
+= 6.7 =
+* Added “li-month" to the shortcut option "html_tag". "li-month" display style is that events that take place on the same month will be shown together. See the documentation in details. For technical detals, see the plugin library/tags/li-month.php.
+
 = 6.6 =
 * Add the function to shift the hours, minutes, and seconds by setting the value of "Fix Timezone Offset” in this plugin setting menu if it cannot solve the timezone issue.
 * Change datetime function instead of strtotime to support the year 2038 issue regarding some date processing.
