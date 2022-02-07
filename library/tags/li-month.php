@@ -1,25 +1,14 @@
 <?php 
 
-$pre_start_date_value_style = '';
-$start_date_month_value = $this->wp_datetime_converter_get_date_from_gmt("Ym", $dateTime);
-$pre_item_head_style='';
-if( isset($pre_start_dateTime) ):
-	$pre_start_date_month_value = $this->wp_datetime_converter_get_date_from_gmt("Ym", $pre_start_dateTime);
-	if($pre_start_date_month_value === $start_date_month_value):
-		$month_value = '';
-	else:
-		$month_value = $this->wp_datetime_converter_get_date_from_gmt("F", $dateTime);
-
-		if( isset($month_value) && !empty($month_value) ) :
-			$out_temp .= <<< ___EOF___
+if($pre_start_date_month_value === $start_date_month_value):
+	$month_value = '';
+else:
+	if( isset($month_value) && !empty($month_value) ) :
+		$out_temp .= <<< ___EOF___
 </ul>
 
 ___EOF___;
-
-		endif;
 	endif;
-else:
-	$month_value = $this->wp_datetime_converter_get_date_from_gmt("F", $dateTime);
 endif;
 
 if( isset($month_value) && !empty($month_value) ) :
@@ -49,10 +38,9 @@ if ( isset($view_location) && !empty($view_location) ):
 	if( isset($view_location_name) && !empty($view_location_name) ): 
 	    $location_header_name = $view_location_name;
 	 else:
-	    $location_header_name = __("Location:", $this->plugin_name);
+	    $location_header_name = __("Location:", $plugin_name);
 	 endif;
-	$pre_start_date_value_style = '';    
-$out_temp .= <<< ___EOF___
+	$out_temp .= <<< ___EOF___
 <br/><span class='${html_tag_class}_location_head'>$location_header_name</span> <span class='${html_tag_class}_location'>$gc_location</span>
 ___EOF___;
 endif;

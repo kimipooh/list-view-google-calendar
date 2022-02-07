@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.7
+Version: 6.7.1
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -55,7 +55,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 670;
+		$this->settings['version'] = 671;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -305,6 +305,14 @@ class gclv extends gclv_hash_tags{
 						$output_category_temp .= " <span class='${html_tag_class}_organizer'>$hash_tags_organizer_value</span> ";
 					endif;
 				endif;
+				$start_date_month_value = $this->wp_datetime_converter_get_date_from_gmt("Ym", $dateTime);
+				if( isset($pre_start_dateTime) ):
+					$pre_start_date_month_value = $this->wp_datetime_converter_get_date_from_gmt("Ym", $pre_start_dateTime);
+				else:
+					$pre_start_date_month_value = '';
+				endif;
+				$month_value = $this->wp_datetime_converter_get_date_from_gmt("F", $dateTime);
+
 				$out_atts = array(
 					'start_date_num'	=> $start_date_num,
 					'start_date_value'	=> $start_date_value,
@@ -329,7 +337,10 @@ class gclv extends gclv_hash_tags{
 					'element_count' => $element_count,
 					'gc_description_title' => '',
 					'view_location_name'=>$view_location_name,
-					'no_event_link'=>$no_event_link
+					'no_event_link'=>$no_event_link,
+					'start_date_month_value'=> $start_date_month_value,
+					'pre_start_date_month_value'=> $pre_start_date_month_value,
+					'month_value'	=> $month_value
 				);
 				// When  $hash_tags_display_value = "none" or "off"  (#display none or #display off   in Description of Google Calendar Event), the event isn't displayed.
 				if($hash_tags_display_value === "none" || $hash_tags_display_value === "off"):

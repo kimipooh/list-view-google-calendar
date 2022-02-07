@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
 Tested up to: 5.9
-Stable tag: 6.7
+Stable tag: 6.7.1
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,9 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 6.7.1 =
+* Implemented the hook 'lvgc_each_output_data' to customize the month-by-month display. Added hook-specific variables "start_date_month_value", "pre_start_date_month_value", and "month_value".
+
 = 6.7 =
 * Added “li-month" to the shortcut option "html_tag". "li-month" display style is that events that take place on the same month will be shown together. See the documentation in details. For technical detals, see the plugin library/tags/li-month.php.
 
