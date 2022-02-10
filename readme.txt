@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
 Tested up to: 5.9
-Stable tag: 6.7.1
+Stable tag: 6.7.2
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,10 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 6.7.2 =
+* Added hook-specific variables "translate_month_values”(array) for using WordPress Core's translation feature to store the month name.
+* Changed “li-month" in the shortcut option “html_tag" to use WordPress Core's translation feature to display the month name.
+
 = 6.7.1 =
 * Implemented the hook 'lvgc_each_output_data' to customize the month-by-month display. Added hook-specific variables "start_date_month_value", "pre_start_date_month_value", and "month_value".
 

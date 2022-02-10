@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.7.1
+Version: 6.7.2
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -55,7 +55,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 671;
+		$this->settings['version'] = 672;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -164,6 +164,26 @@ class gclv extends gclv_hash_tags{
 			endif;
 		endif;		
 		return $date_obj->format($format);
+	}
+
+	// Mapping month names with WordPress Core's translation feature 
+	public function convert_language_of_month_name(){
+		  $convert_month = array(
+		  	"January" => __("January"),
+  			"February"	=> __("February"),
+  			"March" => __("March"),
+  			"April" => __("April"),
+  			"May" => __("May"),
+  			"June" => __("June"),
+  			"July" => __("July"),
+  			"August" => __("August"),
+  			"September" => __("September"),
+  			"October" => __("October"),
+  			"November" => __("November"),
+  			"December" => __("December")
+  		);
+  		  		
+ 		return $convert_month;
 	}
 
 	public function shortcodes($atts){
@@ -312,6 +332,8 @@ class gclv extends gclv_hash_tags{
 					$pre_start_date_month_value = '';
 				endif;
 				$month_value = $this->wp_datetime_converter_get_date_from_gmt("F", $dateTime);
+				
+				$translate_month_values = $this->convert_language_of_month_name();
 
 				$out_atts = array(
 					'start_date_num'	=> $start_date_num,
@@ -340,7 +362,8 @@ class gclv extends gclv_hash_tags{
 					'no_event_link'=>$no_event_link,
 					'start_date_month_value'=> $start_date_month_value,
 					'pre_start_date_month_value'=> $pre_start_date_month_value,
-					'month_value'	=> $month_value
+					'month_value'	=> $month_value,
+					'translate_month_values' => $translate_month_values,
 				);
 				// When  $hash_tags_display_value = "none" or "off"  (#display none or #display off   in Description of Google Calendar Event), the event isn't displayed.
 				if($hash_tags_display_value === "none" || $hash_tags_display_value === "off"):

@@ -12,6 +12,13 @@ ___EOF___;
 endif;
 
 if( isset($month_value) && !empty($month_value) ) :
+	foreach($translate_month_values as $org_lang=>$con_lang):
+		if($month_value === $org_lang):
+			$month_value = $con_lang;
+			break;
+		endif;
+	endforeach;
+
 $out_temp .= <<< ___EOF___
 <span style='font-weight: bold;'  class='${html_tag_class}_item_month'>$month_value</span>
 <ul class='${html_tag_class}_item'>
