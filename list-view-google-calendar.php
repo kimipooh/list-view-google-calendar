@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.7.2
+Version: 6.8
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -55,7 +55,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 672;
+		$this->settings['version'] = 680;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -218,6 +218,7 @@ class gclv extends gclv_hash_tags{
 			'no_event_message' => '', // When there are no events, this message is displayed priority.
 			'view_location_name' =>'', // If the view_location option is enabled, this value is set as the title of the item.
 			'no_event_link' => '', // If the no_event_link value isn't empty, the event link is removed.
+			'view_end_date' => '', // If the view_end_date value isn't empty, the end date is displayed, using the value of view_end_date as the delimiter string after the start date.
 		);
 		if(!empty($atts_special_allow_options)):
 			$atts_options = array_merge($atts_options, $atts_special_allow_options);  // Overwrite the same options.
@@ -364,6 +365,7 @@ class gclv extends gclv_hash_tags{
 					'pre_start_date_month_value'=> $pre_start_date_month_value,
 					'month_value'	=> $month_value,
 					'translate_month_values' => $translate_month_values,
+					'view_end_date'=>$view_end_date,
 				);
 				// When  $hash_tags_display_value = "none" or "off"  (#display none or #display off   in Description of Google Calendar Event), the event isn't displayed.
 				if($hash_tags_display_value === "none" || $hash_tags_display_value === "off"):
