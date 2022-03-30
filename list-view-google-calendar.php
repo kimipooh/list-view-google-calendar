@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.8
+Version: 6.9
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -55,7 +55,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 680;
+		$this->settings['version'] = 690;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -99,11 +99,18 @@ class gclv extends gclv_hash_tags{
 	}		
 		
 	// Get the date time with WordPress timezone.
-	public function wp_datetime_converter_get_date_from_gmt($format="c", $dateTime="", $timezone_set=""){
+	public function wp_datetime_converter_get_date_from_gmt($format="c", $dateTime="", $timezone_set="", $flag="start"){
 		$timezone_set = $this->wp_datetime_converter_init();
 		if(empty($dateTime)) return $date;
 		if(empty($timezone_set)) return $timezone_set;
 		$date_obj = new DateTime($dateTime); // UTC timezone
+		// In case of all day,  the timezone is not set. ex. 30/03/2022(all day) sets "start: 30/03/2022, end: 01/04/2022)". Thus, fixed to subtract one second from the end date to make it 23:59:59.
+		if(!preg_match('/T/', $dateTime)):
+			if($flag === "end"):
+				$date_obj->modify('-1 seconds');
+			endif;				
+			return $date_obj->format($format);
+		endif; 
 		$date_obj->setTimezone(new DateTimeZone($timezone_set)); // Set timezone.
 		$settings = get_option($this->set_op);
 		if(isset($settings['google_calendar']) && is_array($settings['google_calendar'])):
@@ -228,12 +235,12 @@ class gclv extends gclv_hash_tags{
 		$html_tag_class = $html_tag_class ?: $this->plugin_name;
 
 		$settings = get_option($this->set_op);	
-		$gc_data = $this->get_google_calendar_contents($atts);
+		$gc_data = $this->get_google_calendar_contents($atts); 
 		// get lang data.
-		$gc_data = $this->get_select_lang_data($gc_data, $atts);
+		$gc_data = $this->get_select_lang_data($gc_data, $atts); 
 		// Security check for the hook (clean up ALL html tag except description).
 		$gc_data = $this->security_check_array($gc_data);
-
+var_dump($gc_data);
 		if(!isset($settings['google_calendar'])):
 			$settings['google_calendar'] = array();
 		endif;
@@ -280,8 +287,8 @@ class gclv extends gclv_hash_tags{
 				$today_date_num = $this->wp_datetime_converter_current_time("Ymd");
 				$start_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $dateTime);
 				$start_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $dateTime);
-				$end_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $end_dateTime);
-				$end_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $end_dateTime);
+				$end_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $end_dateTime, "", "end");
+				$end_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $end_dateTime, "", "end");
 
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
@@ -542,7 +549,7 @@ class gclv extends gclv_hash_tags{
 			endforeach;
 		endif;
 		$url = $g_url .'&'.implode('&', $params);
-
+ 
 		// Fixed the warning : Ref. https://qiita.com/kawaguchi_011/items/29cc3811b2bc2ce2d85e
 		$fgc_context = stream_context_create(array(
 			 'http' => array('ignore_errors' => true),

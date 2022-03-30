@@ -4,8 +4,8 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
-Tested up to: 5.9
-Stable tag: 6.8
+Tested up to: 5.9.2
+Stable tag: 6.9
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,9 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 6.9 =
+* Supported to fix the end date on all-day event because the end date value getting Google Calendar API is next day in the case of all-day events. 
+
 = 6.8 =
 * Added the "view_end_date" shortcode option. If the view_end_date value isn't empty, the end date is displayed, using the value of view_end_date as the delimiter string after the start date, except “html_tag” shortcode option is "li2" or customized by the hook. 
 
