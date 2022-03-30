@@ -240,7 +240,7 @@ class gclv extends gclv_hash_tags{
 		$gc_data = $this->get_select_lang_data($gc_data, $atts); 
 		// Security check for the hook (clean up ALL html tag except description).
 		$gc_data = $this->security_check_array($gc_data);
-var_dump($gc_data);
+
 		if(!isset($settings['google_calendar'])):
 			$settings['google_calendar'] = array();
 		endif;
