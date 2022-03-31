@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 4.0
 Requires PHP: 5.6
 Tested up to: 5.9.2
-Stable tag: 6.9,1
+Stable tag: 6.9.2
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,9 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 6.9.2 =
+* Changed to not show end date if view_end_date is set and the event period is only within a day.
+
 = 6.9.1 =
 * Fixed debug mode.
 

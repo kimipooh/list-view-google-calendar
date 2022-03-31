@@ -1,7 +1,7 @@
 <?php 
 
 $start_end_date_value = $start_date_value;
-if(!empty($view_end_date) && !empty($end_date_value)):
+if(!empty($view_end_date) && !empty($end_date_value) && $start_date_num !== $end_date_num):
 	$start_end_date_value .=  ' ' . $view_end_date . ' ' . $end_date_value;
 endif;
 
