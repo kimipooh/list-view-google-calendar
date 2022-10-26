@@ -2,7 +2,7 @@
 Contributors: kimipooh
 Donate link: 
 Tags: Google Calendar
-Requires at least: 4.0
+Requires at least: 5.4
 Requires PHP: 5.6
 Tested up to: 6.1
 Stable tag: 6.9.2
@@ -67,6 +67,7 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 * Changed to not show end date if view_end_date is set and the event period is only within a day.
 * Tested up WordPress 6.0.
 * Tested up WordPerss 6.1.
+* Changed the supported version of WordPress from 4.0 to 5.4 or higher.
 
 = 6.9.1 =
 * Fixed debug mode.
