@@ -21,6 +21,6 @@
          "phpunit/phpunit": "^5.7.21 || ^6.5 || ^7.5"
     },
     "config": {
-        "allow-plugins": false
+        "allow-plugins": true
     }
 }
