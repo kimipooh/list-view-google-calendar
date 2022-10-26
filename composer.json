@@ -21,10 +21,6 @@
          "phpunit/phpunit": "^5.7.21 || ^6.5 || ^7.5"
     },
     "config": {
-        "allow-plugins": {
-            "third-party/required-plugin": true,
-            "my-organization/*": true,
-            "unnecessary/plugin": false
-        }
+        "allow-plugins": false
     }
 }
