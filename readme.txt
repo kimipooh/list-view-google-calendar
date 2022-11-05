@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 5.4
 Requires PHP: 5.6
 Tested up to: 6.1
-Stable tag: 6.9.2
+Stable tag: 7.0.0
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,9 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.0.0 =
+* The function for retrieving from the Google Calendar API has been changed from file_get_contents to curl for improving the connection timeout issue in case of not responsing API.
+
 = 6.9.2 =
 * Changed to not show end date if view_end_date is set and the event period is only within a day.
 * Tested up WordPress 6.0.

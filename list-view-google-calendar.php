@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 6.9.2
+Version: 7.0.0
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -11,6 +11,7 @@ Domain Path: /lang
 */
 
 require_once( plugin_dir_path(__FILE__) . '/includes/hash_tags.php');
+require_once( plugin_dir_path(__FILE__) . '/includes/getAPIDataCurl.php');
 
 class gclv extends gclv_hash_tags{
 	var $set_op = 'list-view-google-calendar_array';	// Save setting name in DB
@@ -558,12 +559,14 @@ class gclv extends gclv_hash_tags{
 		$urls_json = array();
 		$urls_results = array();
 		foreach($urls as $key=>$value):
-			$urls_results = file_get_contents($value, false, $fgc_context);
+//			$urls_results = file_get_contents($value, false, $fgc_context);
+			$urls_results = k_getAPIDataCurl($value);
 			$urls_json[$key] = $urls_results ? json_decode($urls_results, true) : '';
 		endforeach;
 		$results  = array();
 		if(isset($gc['id']) && isset($gc['api-key'])):
-			$results = file_get_contents($url, false, $fgc_context);
+			$results = k_getAPIDataCurl($url);
+//			$results = file_get_contents($url, false, $fgc_context);
 		endif;
 		$json = $results ? json_decode($results, true) : '';
 		// Merge Events of Multi Galendar
