@@ -3,8 +3,8 @@ Contributors: kimipooh
 Donate link: 
 Tags: Google Calendar
 Requires at least: 5.4
-Requires PHP: 5.6
-Tested up to: 6.1
+Requires PHP: 7.4
+Tested up to: 6.5.2
 Stable tag: 7.1.0
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -65,6 +65,7 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 == Changelog ==
 = 7.1.0 =
 * Tested up WordPress 6.1 with PHP 8.2.
+* Tested up WordPress 6.5.2 with PHP 8.3.6.
 
 = 7.0.0 =
 * The function for retrieving from the Google Calendar API has been changed from file_get_contents to curl for improving the connection timeout issue in case of not responsing API.
