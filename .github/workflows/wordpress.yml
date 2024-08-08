@@ -18,9 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         # Notes regarding supported versions in WP:
-        # The base matrix only contains the PHP versions which are supported on all supported WP versions.
-        # phpunit10(supported php8.1) will be released on February 3, 2023(https://phpunit.de/supported-versions.html)
-        php: ['5.6', '7.0', '7.4', '8.0']
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3']
         wp: ['latest']
         experimental: [false]
 
@@ -29,22 +27,21 @@ jobs:
           # PHP 8.1 is sort of supported since WP 5.9.
           # PHP 8.0 is sort of supported since WP 5.6.
           # PHP 7.4 is supported since WP 5.3.
-          - php: '8.0'
+          - php: '8.3'
+            wp: 'latest'
+            experimental: false
+          - php: '8.2'
+            wp: 'latest'
+            experimental: false
+          - php: '8.1'
             wp: 'latest'
             experimental: false
           - php: '8.0'
-            wp: '5.6'
+            wp: 'latest'
             experimental: false
           - php: '7.4'
             wp: 'latest'
             experimental: false
-          - php: '7.4'
-            wp: '5.4'
-            experimental: false
-          # Experimental builds. These are allowed to fail.
-          - php: '7.4'
-            wp: 'trunk'
-            experimental: true
 
     name: "PHP ${{ matrix.php }} - WP ${{ matrix.wp }}"
 
@@ -91,12 +88,12 @@ jobs:
       # @link https://github.com/marketplace/actions/install-composer-dependencies
       - name: Install Composer dependencies for PHP < 8.0
         if: ${{ matrix.php < 8.0 || ( ( matrix.wp == 'trunk' || matrix.wp >= 5.9 ) && matrix.wp != 'latest' ) }}
-        uses: "ramsey/composer-install@v1"
+        uses: "ramsey/composer-install@v2"
 
       # For PHP 8.0 and above on WP 5.2 - 5.8, we need to install with ignore platform reqs as not all dependencies allow it.
       - name: Install Composer dependencies for PHP >= 8.0
         if: ${{ matrix.php >= 8.0 && ( matrix.wp == 'latest' || ( matrix.wp != 'trunk' && matrix.wp < 5.9 ) ) }}
-        uses: "ramsey/composer-install@v1"
+        uses: "ramsey/composer-install@v2"
         with:
           composer-options: --ignore-platform-reqs
 
