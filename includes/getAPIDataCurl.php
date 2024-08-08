@@ -2,8 +2,9 @@
 // Reference: https://qiita.com/shinkuFencer/items/d7546c8cbf3bbe86dab8
 function k_getAPIDataCurl($url){
     $option = [
-        CURLOPT_RETURNTRANSFER => true, //文字列として返す
-        CURLOPT_TIMEOUT        => 3, // タイムアウト時間
+        CURLOPT_RETURNTRANSFER => true, //Return as string
+        CURLOPT_TIMEOUT        => 3, // timeout period(second)
+        CURLOPT_REFERER        => get_permalink(), // Set to counteract the fact that curl returns no value on some servers when the referrer is not set.
     ];
 
     $ch = curl_init($url);
@@ -13,20 +14,17 @@ function k_getAPIDataCurl($url){
     $info    = curl_getinfo($ch);
     $errorNo = curl_errno($ch);
 
-    // OK以外はエラーなので空白配列を返す
+    // Returns a blank array because it is an error except OK.
     if ($errorNo !== CURLE_OK) {
-        // 詳しくエラーハンドリングしたい場合はerrorNoで確認
-        // タイムアウトの場合はCURLE_OPERATION_TIMEDOUT
+        // If you want to handle errors in detail, check with $errorNo.
+        // E.g. for timeouts, this can be checked with CURLE_OPERATION_TIMEDOUT.
         return [];
     }
 
-    // 200以外のステータスコードは失敗とみなし空配列を返す
+    // Status codes other than 200 are regarded as failures and an empty array is returned.
     if ($info['http_code'] !== 200) {
         return [];
     }
-
-    // 文字列から変換
-    //$jsonArray = json_decode($json, true);
 
     return $json;
 }
