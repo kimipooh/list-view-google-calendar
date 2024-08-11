@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 5.4
 Requires PHP: 7.4
 Tested up to: 6.6.1
-Stable tag: 7.1.1
+Stable tag: 7.1.2
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,9 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.1.2 =
+* Added the values of three selections; “yes|link”, “yes|map”, and “yes|link|map", to the "view_location" shortcode option. When setting up ‘view_location=“yes|link”', the link is added for URL (http:// or https://) the location value of Google Calendar. Then, when setting up ‘view_location=“yes|map”, the link to Google Maps is added to the location value of Google Calendar. Moreover, when setting up ‘view_location=“yes|link|map”, the link is added for URL (http:// or https://) the location value of Google Calendar and if there is not URL in the location value, the link of Google Maps is added to it.
+
 = 7.1.1 =
 * Fixed k_getAPIDataCurl function in "includes/getAPIDataCurl.php" for the issue that may be a failure to get content without the referer header.
 * Tested up WordPress 6.6.1 with PHP 8.3.6

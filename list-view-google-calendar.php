@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.1.1
+Version: 7.1.2
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -311,6 +311,24 @@ class gclv extends gclv_hash_tags{
 				$gc_location = "";
 				if(isset($gc_value['location'])):
 					$gc_location = esc_html($gc_value['location']);
+					if(isset($atts['view_location']) && !empty($gc_location)):
+						// in case of view_location = "yes|link" in the shortcode opton,
+						if($atts['view_location'] === 'yes|link'):
+							$url_preg='/http(s)?:\/\/[0-9a-z_,.:;&=+*%$#!?@()~\'\/-]+/i';
+							$gc_location  = preg_replace($url_preg, '<a target="_blank" href="$0">$0</a>', $gc_location);
+						elseif($atts['view_location'] === 'yes|map'):
+							$gc_location  = '<a target="_blank" href="https://www.google.com/maps/search/' . $gc_location . '"/>' . $gc_location . '</a>';
+						elseif($atts['view_location'] === 'yes|link|map'):
+							$url_preg='/http(s)?:\/\/[0-9a-z_,.:;&=+*%$#!?@()~\'\/-]+/i';
+							if(preg_match($url_preg, $gc_location)):
+								$gc_location  = preg_replace($url_preg, '<a target="_blank" href="$0">$0</a>', $gc_location);
+							else:
+								$gc_location  = '<a target="_blank" href="https://www.google.com/maps/search/' . $gc_location . '"/>' . $gc_location . '</a>';
+							endif;
+						endif;
+					endif;
+					
+					
 					$gc_value['location'] = $gc_location;
 				endif;
 				$plugin_name = $this->plugin_name;
