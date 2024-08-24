@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 5.4
 Requires PHP: 7.4
 Tested up to: 6.6.1
-Stable tag: 7.1.2
+Stable tag: 7.2.0
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,11 @@ Please see the [documentation](https://info.cseas.kyoto-u.ac.jp/en/links-en/plug
 2. Activate the plugin in your WordPress admin panel.
 
 == Frequently Asked Questions ==
+= How to use the notation start time - end time =
+If you want to use the notation ‘start time - end time’, try setting the following shortcode option.
+ex. MM.DD.YY  H:M - H:M(same day) or MM.DD.YY  H:M - MM.DD.YY H:M (2 or more days)
+date_format="m.d.y H:i" view_end_date=" - "
+
 = What can you do with a hook? =
 You can customize the display of events.
 The styles provided by the plugin are available in the library/tags folder of the plugin. For details, please see the [documentation](https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view) in detail. [Japanese documentation](https://info.cseas.kyoto-u.ac.jp/links-ja/plugin-ja/wordpress-dev-info/google-calendar-list-view)
@@ -63,6 +68,12 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.2.0 =
+* Added "li-title" to the sortcode option "html_tag". This template displays the title (in bold text) on the first line and other elements such as date and time on the second and subsequent lines.
+* By setting on the shortcode options of date_format="m.d.y H:i" view_end_date="- " to allow both start and end times to be displayed.
+* Shortcode option ‘no_event_link’, CSS for {$html_tag_class}_title can be specified for the title.
+* Part of the processing at the beginning of the display template file for each event has been moved to the main body.
+
 = 7.1.2 =
 * Added the values of three selections; “yes|link”, “yes|map”, and “yes|link|map", to the "view_location" shortcode option. When setting up ‘view_location=“yes|link”', the link is added for URL (http:// or https://) the location value of Google Calendar. Then, when setting up ‘view_location=“yes|map”, the link to Google Maps is added to the location value of Google Calendar. Moreover, when setting up ‘view_location=“yes|link|map”, the link is added for URL (http:// or https://) the location value of Google Calendar and if there is not URL in the location value, the link of Google Maps is added to it.
 

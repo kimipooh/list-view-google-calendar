@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.1.2
+Version: 7.2.-
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -21,7 +21,7 @@ class gclv extends gclv_hash_tags{
 	var $default_maxResults = 10;  
 	var $default_noEventMessage = "There are no events.";
 	var $default_fix_timezone_offset = ""; // Corrected values for time zone deviations
-	var $html_tags = array('li'=>'li', 'p'=>'p', 'dd'=>'dd', 'lip'=>'lip', 'li2'=>'li2', 'li-month'=>'li-month'); 
+	var $html_tags = array('li'=>'li', 'p'=>'p', 'dd'=>'dd', 'lip'=>'lip', 'li2'=>'li2', 'li-month'=>'li-month', 'li-title'=>'li-title'); 
 	var $default_html_tag = 'li'; 
 	var $google_calendar = array( 
 		'api-key'		=> '',
@@ -85,7 +85,7 @@ class gclv extends gclv_hash_tags{
 	}
 	// Get current time with Timezone.
 	public function wp_datetime_converter_current_time($format="c"){
-		$timezone_set = $this->wp_datetime_converter_init();
+		$timezone_set = $this->wp_datetime_converter_init(); 
 		$date_obj = new DateTime('', new DateTimeZone($timezone_set)); // get UTC time.
 		$settings = get_option($this->set_op);
 		if(isset($settings['google_calendar']) && is_array($settings['google_calendar'])):
@@ -109,7 +109,7 @@ class gclv extends gclv_hash_tags{
 		if(!preg_match('/T/', $dateTime)):
 			if($flag === "end"):
 				$date_obj->modify('-1 seconds');
-			endif;				
+			endif;
 			return $date_obj->format($format);
 		endif; 
 		$date_obj->setTimezone(new DateTimeZone($timezone_set)); // Set timezone.
@@ -121,7 +121,8 @@ class gclv extends gclv_hash_tags{
 			if(@DateInterval::createFromDateString($this->google_calendar['fix-timezone-offset'])):
 				$date_obj->modify($this->google_calendar['fix-timezone-offset']);
 			endif;
-		endif;		
+		endif;
+
 		return $date_obj->format($format);
 	}
 
@@ -290,7 +291,7 @@ class gclv extends gclv_hash_tags{
 				$start_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $dateTime);
 				$end_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $end_dateTime, "", "end");
 				$end_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $end_dateTime, "", "end");
-
+		
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 				$gc_link = "";
@@ -416,9 +417,25 @@ class gclv extends gclv_hash_tags{
 					endif;	
 				endif;
 				$out_atts['gc_description_title'] = $gc_description_title;
-				
 				$out_temp = '';
 				$filter_out_temp = '';
+				$start_end_date_value = $start_date_value;
+				if(!empty($view_end_date) && !empty($end_date_value)):
+					if( $start_date_num !== $end_date_num ):
+						$start_end_date_value .=  ' ' . $view_end_date . ' ' . $end_date_value;
+					else:
+						$split_time = explode(" ",$end_date_value);
+						array_shift($split_time);
+						if(!empty($split_time)):
+							$start_end_date_value .=  ' ' . $view_end_date;
+							foreach($split_time as $st):
+								if($st != $start_date_num):
+									$start_end_date_value .=  ' ' . $st;
+								endif;
+							endforeach;
+						endif;
+					endif;
+				endif;
 				if(!empty($html_tag) && file_exists (dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php')):
 					include(dirname( __FILE__ ) . '/library/tags/' . $html_tag . '.php');
 				endif;
