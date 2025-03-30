@@ -18,7 +18,7 @@
          "dealerdirect/phpcodesniffer-composer-installer": "^0.7",
          "phpcompatibility/phpcompatibility-wp": "^2.1",
          "yoast/phpunit-polyfills": "^1.0.1",
-         "phpunit/phpunit": "^5.7.21 || ^6.5 || ^7.5 || ^9.0"
+         "phpunit/phpunit": "^9.5 || ^10.5 | ^11.5 | ^12.0"
     },
     "config": {
         "allow-plugins": true

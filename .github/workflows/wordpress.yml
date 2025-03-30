@@ -18,7 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         # Notes regarding supported versions in WP:
-        php: ['7.4', '8.0', '8.1', '8.2', '8.3']
+        # The base matrix only contains the PHP versions which are supported on all supported WP versions.
+        php: ['7.4', '8.0', '8.1', '8.2','8.3','8.4']
         wp: ['latest']
         experimental: [false]
 
@@ -27,21 +28,30 @@ jobs:
           # PHP 8.1 is sort of supported since WP 5.9.
           # PHP 8.0 is sort of supported since WP 5.6.
           # PHP 7.4 is supported since WP 5.3.
+          - php: '8.4'
+            wp: 'latest'
+            experimental: false
+            phpunit: 12.0
           - php: '8.3'
             wp: 'latest'
             experimental: false
+            phpunit: 12.0
           - php: '8.2'
             wp: 'latest'
             experimental: false
+            phpunit: 11.5
           - php: '8.1'
             wp: 'latest'
             experimental: false
+            phpunit: 10.5
           - php: '8.0'
             wp: 'latest'
             experimental: false
+            phpunit: 9.5
           - php: '7.4'
             wp: 'latest'
             experimental: false
+            phpunit: 9.5
 
     name: "PHP ${{ matrix.php }} - WP ${{ matrix.wp }}"
 
@@ -73,6 +83,7 @@ jobs:
           coverage: none
           # The PHP 5.6 and 7.0 images don't include mysql[i] by default.
           extensions: mysqli
+          tools: phpunit:${{ matrix.phpunit }}
 
       - name: Set up WordPress
         run: phpunit/install.sh wordpress_test root '' 127.0.0.1:3306 ${{ matrix.wp }}
@@ -88,12 +99,12 @@ jobs:
       # @link https://github.com/marketplace/actions/install-composer-dependencies
       - name: Install Composer dependencies for PHP < 8.0
         if: ${{ matrix.php < 8.0 || ( ( matrix.wp == 'trunk' || matrix.wp >= 5.9 ) && matrix.wp != 'latest' ) }}
-        uses: "ramsey/composer-install@v2"
+        uses: "ramsey/composer-install@v1"
 
       # For PHP 8.0 and above on WP 5.2 - 5.8, we need to install with ignore platform reqs as not all dependencies allow it.
       - name: Install Composer dependencies for PHP >= 8.0
         if: ${{ matrix.php >= 8.0 && ( matrix.wp == 'latest' || ( matrix.wp != 'trunk' && matrix.wp < 5.9 ) ) }}
-        uses: "ramsey/composer-install@v2"
+        uses: "ramsey/composer-install@v1"
         with:
           composer-options: --ignore-platform-reqs
 

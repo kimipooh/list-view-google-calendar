@@ -31,6 +31,22 @@ fi
 
 set -ex
 
+install_svn() {
+	# Function to check if a command exists
+	command_exists() {
+		command -v "$1" >/dev/null 2>&1
+	}
+
+	# Check if SVN is installed
+	if command_exists svn; then
+		echo "SVN is already installed."
+	else
+		echo "SVN is not installed. Installing SVN..."
+		# Install SVN
+		sudo apt-get install -y subversion
+	fi
+}
+
 install_wp_and_test_suite() {
 	# setup up WordPress
 	if [ ! -d $WP_CORE_DIR ]; then
@@ -80,5 +96,6 @@ install_db() {
 	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
 }
 
+install_svn
 install_wp_and_test_suite
 install_db
