@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8.2
-Stable tag: 7.2.3
+Stable tag: 7.2.4
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,9 @@ Please see the [documentation](https://info.cseas.kyoto-u.ac.jp/en/links-en/plug
 If you want to use the notation ‘start time - end time’, try setting the following shortcode option.
 ex. MM.DD.YY  H:M - H:M(same day) or MM.DD.YY  H:M - MM.DD.YY H:M (2 or more days)
 date_format="m.d.y H:i" view_end_date=" - "
+or
+date_format="m.d.y H:i" view_end_date="&nbsp;-&nbsp;"
+
 
 = What can you do with a hook? =
 You can customize the display of events.
@@ -68,8 +71,12 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
-= 7.2.2 =
-* Added template file (forgot to add) for li-notitle, which is newly added to html_tag shortcut options.
+= 7.2.4 =
+* Fixed template file for li-notitle.
+* Added variables for start time ($start_date_time) and end time ($end_date_time) for hooks. 
+
+= 7.2.3 =
+* Added template file for li-notitle, which is newly added to html_tag shortcut options.
 
 = 7.2.2 =
 * Tested up WordPress 6.7.2 with PHP 8.3.19 and 8.4.5.

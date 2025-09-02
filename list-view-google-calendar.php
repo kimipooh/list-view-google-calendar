@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.2.3
+Version: 7.2.4
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -289,9 +289,11 @@ class gclv extends gclv_hash_tags{
 				$today_date_num = $this->wp_datetime_converter_current_time("Ymd");
 				$start_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $dateTime);
 				$start_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $dateTime);
+				$start_date_time = $this->wp_datetime_converter_get_date_from_gmt("h:i", $dateTime);
 				$end_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $end_dateTime, "", "end");
 				$end_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $end_dateTime, "", "end");
-		
+				$end_date_time = $this->wp_datetime_converter_get_date_from_gmt("h:i", $end_dateTime, "", "end");
+
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 				$gc_link = "";
@@ -366,8 +368,10 @@ class gclv extends gclv_hash_tags{
 				$out_atts = array(
 					'start_date_num'	=> $start_date_num,
 					'start_date_value'	=> $start_date_value,
+					'start_date_time'	=> $start_date_time,
 					'end_date_num'		=> $end_date_num,
 					'end_date_value'	=> $end_date_value,
+					'end_date_time'		=> $end_date_time,
 					'today_date_num'	=> $today_date_num,
 					'holding_flag'		=> $holding_flag,
 					'gc_link'			=> $gc_link,
@@ -422,15 +426,15 @@ class gclv extends gclv_hash_tags{
 				$start_end_date_value = $start_date_value;
 				if(!empty($view_end_date) && !empty($end_date_value)):
 					if( $start_date_num !== $end_date_num ):
-						$start_end_date_value .=  ' ' . $view_end_date . ' ' . $end_date_value;
+						$start_end_date_value .=  $view_end_date . $end_date_value;
 					else:
 						$split_time = explode(" ",$end_date_value);
 						array_shift($split_time);
 						if(!empty($split_time)):
-							$start_end_date_value .=  ' ' . $view_end_date;
+							$start_end_date_value .=  $view_end_date;
 							foreach($split_time as $st):
 								if($st != $start_date_num):
-									$start_end_date_value .=  ' ' . $st;
+									$start_end_date_value .=  $st;
 								endif;
 							endforeach;
 						endif;

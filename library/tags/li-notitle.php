@@ -1,18 +1,17 @@
 <?php 
 
 // Date (02.09.’25)– Start Time (14:00)-End Time (17:30) ·Location (Bandraum)
-$end_date_time_value = $this->wp_datetime_converter_get_date_from_gmt("h:i", $end_dateTime, "", "end");
 
 if ( isset($no_event_link) && !empty($no_event_link) ): 
 
 $out_temp = <<< ___EOF___
- <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>{$start_end_date_value}-{$end_date_time_value}</span> $output_category_temp
+ <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp
 ___EOF___;
 
 else:
 
 $out_temp = <<< ___EOF___
- <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>{$start_end_date_value}-{$end_date_time_value}</span> $output_category_temp
+ <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp
 ___EOF___;
 
 endif;
