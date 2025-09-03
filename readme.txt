@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8.2
-Stable tag: 7.2.6
+Stable tag: 7.2.7
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,10 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.2.7 =
+* If you set li-month, li-month-notitle to html_tag, we have added the shortcode months_title to add a title to the right of the month. Set it as follows: months_title="1:January title, 8:August title". 
+*  Added variables for months title ($months_title_array) for hooks. 
+
 = 7.2.6 =
 * Added template file for li-month-notitle, which is newly added to html_tag shortcut options.
 

@@ -22,6 +22,7 @@ if( isset($month_value) && !empty($month_value) ) :
 			break;
 		endif;
 	endforeach;
+
 if (isset($month_title) && !empty($month_title)):
 	$month_value .= " " . $month_title;
 endif;
@@ -36,13 +37,13 @@ endif;
 if ( isset($no_event_link) && !empty($no_event_link) ): 
 
 $out_temp .= <<< ___EOF___
- <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp <span class="{$html_tag_class}_title" title="$gc_description_title">$gc_title</span>
+ <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp
 ___EOF___;
 
 else:
 
 $out_temp .= <<< ___EOF___
- <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp <a target="_blank" class='{$html_tag_class}_link' href='$gc_link' title="$gc_description_title">$gc_title</a>
+ <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp
 ___EOF___;
 
 endif;
@@ -54,7 +55,7 @@ if ( isset($view_location) && !empty($view_location) ):
 	    $location_header_name = __("Location:", $plugin_name);
 	 endif;
 	$out_temp .= <<< ___EOF___
-<br/><span class='{$html_tag_class}_location_head'>$location_header_name</span> <span class='{$html_tag_class}_location'>$gc_location</span>
+<span class='{$html_tag_class}_location_head'>$location_header_name</span> <span class='{$html_tag_class}_location'>$gc_location</span>
 ___EOF___;
 endif;
 

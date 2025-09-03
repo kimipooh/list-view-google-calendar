@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.2.6
+Version: 7.2.7
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -194,7 +194,29 @@ class gclv extends gclv_hash_tags{
   		  		
  		return $convert_month;
 	}
-
+	// Get month title
+	// $month_value = "January" and so on, $months_title_array = ("1"=>"January title", "9"=>"September title")
+	public function get_month_title($month_value, $months_title_array){
+		$months = array(
+			"January"	=> "1",
+    		"February"	=> "2",
+    		"March"		=> "3",
+    		"April"		=> "4",
+    		"May"		=> "5",
+    		"June"		=> "6",
+    		"July"		=> "7",
+    		"August"	=> "8",
+    		"September"	=> "9",
+    		"October"	=>"10",
+    		"November"	=>"11",
+    		"December"	=>"12",
+		);
+  		if ( isset($months[$month_value]) && isset($months_title_array[$months[$month_value]])):
+  			return $months_title_array[$months[$month_value]];
+  		else:
+	 		return "";
+	 	endif;
+	}
 	public function shortcodes($atts){
 		$atts = $this->security_check_array($atts);
 		// If there are not any options, $atts will be initialized by array().
@@ -218,10 +240,10 @@ class gclv extends gclv_hash_tags{
 			'g_api_key'		=> '',			// Google Calendar API KEY
 			'g_id'			=> '',			// Google Calendar ID
 			'max_view'		=> '',			// Maximum number of view
-			'max_display'		=> '',		// Maximum number of display
+			'max_display'	=> '',		// Maximum number of display
 			'html_tag'		=> '',			// Allow $this->html_tags value.
 			'html_tag_class'	=> '',		// adding a class to html tag (default: $this->plugin_name) 
-			'hook_secret_key' => '',		// If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
+			'hook_secret_key'	=> '',		// If you use a hook, please set the secret key because of preventing an overwrite from any other plugins.
 			'lang'			=> '',			// List only specific languages. #lang [value] on the comment of Google Calendar. version 2.1
 			'enable_view_category'	=> '',	// If you want to display the category (#type and #organizer), please set this value to "true" or not empty value. version 3.0
 			'view_location'	=> '',	// If the value is not empty, the location data is displayed with title.
@@ -229,6 +251,7 @@ class gclv extends gclv_hash_tags{
 			'view_location_name' =>'', // If the view_location option is enabled, this value is set as the title of the item.
 			'no_event_link' => '', // If the no_event_link value isn't empty, the event link is removed.
 			'view_end_date' => '', // If the view_end_date value isn't empty, the end date is displayed, using the value of view_end_date as the delimiter string after the start date.
+			'months_title'	=> '', // If you have selected li-month, li-month-notitle in html_tags and want to set titles for each month, specify them in order from January "1:January Title, 2:February Title, ..."".
 		);
 		if(!empty($atts_special_allow_options)):
 			$atts_options = array_merge($atts_options, $atts_special_allow_options);  // Overwrite the same options.
@@ -294,6 +317,17 @@ class gclv extends gclv_hash_tags{
 					endif;
 				else:
 					$time_format = "H:i";
+				endif;
+				if(isset($months_title) && !empty($months_title)):
+					$months_title_array = array();
+					$months_title_values = explode(",", $months_title);
+					foreach($months_title_values as $m_title):
+						$m_title_value = explode(":", trim($m_title));
+						if(count($m_title_value) == 2 && !empty($m_title_value[0]) && !empty($m_title_value[1])):
+							$months_title_array[$m_title_value[0]] = $m_title_value[1];
+						endif;
+					endforeach;
+  				    //var_dump($months_title_array);
 				endif;
 				$today_date_num = $this->wp_datetime_converter_current_time("Ymd");
 				$start_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $dateTime);
