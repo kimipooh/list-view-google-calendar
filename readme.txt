@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8.2
-Stable tag: 7.2.5
+Stable tag: 7.2.6
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,9 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.2.6 =
+* Added template file for li-month-notitle, which is newly added to html_tag shortcut options.
+
 = 7.2.5 =
 * In addition to the shortcode options date_format="m.d.y H:i" view_end_date="-", we've added a time_format shortcut: date_format="m.d.y" time_format="H:i" view_end_date="-". Setting these will allow you to display both the start time and end time.
 
