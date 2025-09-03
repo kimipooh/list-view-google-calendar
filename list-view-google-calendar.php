@@ -3,7 +3,7 @@
 Plugin Name: Google Calendar List View
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.2.4
+Version: 7.2.5
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -213,6 +213,7 @@ class gclv extends gclv_hash_tags{
 			'start_date' 	=> '',
 			'end_date'		=> '',
 			'date_format'	=> 'Y.m.d', 
+			'time_format'	=> '', 
 			'orderbysort'	=> '',			// ascending or descending.
 			'g_api_key'		=> '',			// Google Calendar API KEY
 			'g_id'			=> '',			// Google Calendar ID
@@ -286,13 +287,21 @@ class gclv extends gclv_hash_tags{
 					$end_dateTime = $gc_value['end']['date'];
 				endif;
 
+				if( isset($time_format) && !empty($time_format) ):
+					$date_format_s = explode(" ", $date_format);
+					if( count($date_format_s) == 1 ):
+						$date_format .= ' ' . $time_format;
+					endif;
+				else:
+					$time_format = "H:i";
+				endif;
 				$today_date_num = $this->wp_datetime_converter_current_time("Ymd");
 				$start_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $dateTime);
 				$start_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $dateTime);
-				$start_date_time = $this->wp_datetime_converter_get_date_from_gmt("h:i", $dateTime);
+				$start_date_time = $this->wp_datetime_converter_get_date_from_gmt($time_format, $dateTime);
 				$end_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $end_dateTime, "", "end");
 				$end_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $end_dateTime, "", "end");
-				$end_date_time = $this->wp_datetime_converter_get_date_from_gmt("h:i", $end_dateTime, "", "end");
+				$end_date_time = $this->wp_datetime_converter_get_date_from_gmt($time_format, $end_dateTime, "", "end");
 
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
