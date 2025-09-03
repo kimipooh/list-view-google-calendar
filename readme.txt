@@ -37,6 +37,9 @@ date_format="m.d.\'y H:i" view_end_date="-"
 or
 date_format="m.d.\'y" time_format="H:i" view_end_date="-"
 
+For specifying date and time, please refer to the following document: 
+https://www.php.net/manual/en/datetime.format.php
+
 = What can you do with a hook? =
 You can customize the display of events.
 The styles provided by the plugin are available in the library/tags folder of the plugin. For details, please see the [documentation](https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view) in detail. [Japanese documentation](https://info.cseas.kyoto-u.ac.jp/links-ja/plugin-ja/wordpress-dev-info/google-calendar-list-view)
