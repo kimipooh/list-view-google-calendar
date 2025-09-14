@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8.2
-Stable tag: 7.2.7
+Stable tag: 7.2.9
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,12 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.2.9 =
+* Fixed an issue where the end date of the same day was displayed depending on the date_format option when specifying the view_end_date shortcode option to display the end time. However, the format of the end time depends on the time_format option. The default is H:i.
+
+= 7.2.8 =
+* Fixed an issue where the li-month-notitle.php template file was not being included.
+
 = 7.2.7 =
 * If you set li-month, li-month-notitle to html_tag, we have added the shortcode months_title to add a title to the right of the month. Set it as follows: months_title="1:January title, 8:August title". 
 *  Added variables for months title ($months_title_array) for hooks. 
