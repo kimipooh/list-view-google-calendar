@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8.2
-Stable tag: 7.2.9
+Stable tag: 7.3
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,9 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.3 =
+* Added shortcode options "debug" for checking a URL for Google Calendar API. If the value is an ID number in the page/post/archive, display the URL to retrieve data from Google Calendar via API at the specific page/post/archive.
+
 = 7.2.9 =
 * Fixed an issue where the end date of the same day was displayed depending on the date_format option when specifying the view_end_date shortcode option to display the end time. However, the format of the end time depends on the time_format option. The default is H:i.
 
