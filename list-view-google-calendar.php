@@ -3,7 +3,7 @@
 Plugin Name: List View Google Calendar
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.3.1
+Version: 7.3.2
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -16,7 +16,7 @@ require_once( plugin_dir_path(__FILE__) . '/includes/getAPIDataCurl.php');
 class gclv extends gclv_hash_tags{
 	var $set_op = 'list-view-google-calendar_array';	// Save setting name in DB
 	var $plugin_name = 'list-view-google-calendar';
-	var $plugin_title = 'Google Calendar List View';
+	var $plugin_title = 'List View Google Calendar';
 	var $plugin_shortcode = 'gc_list_view';
 	var $default_maxResults = 10;  
 	var $default_noEventMessage = "There are no events.";

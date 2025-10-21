@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8.2
-Stable tag: 7.3.1
+Stable tag: 7.3.2
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,7 +78,7 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
-= 7.3.0 =
+= 7.3.2 =
 * Changed the plugin name to "List View Google Calendar".
 
 = 7.2.9 =
