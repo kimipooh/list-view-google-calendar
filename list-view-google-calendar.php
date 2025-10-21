@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: Google Calendar List View
+Plugin Name: List View Google Calendar
 Plugin URI: 
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.3
+Version: 7.3.0
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 Text Domain: list-view-google-calendar
@@ -252,7 +252,6 @@ class gclv extends gclv_hash_tags{
 			'no_event_link' => '', // If the no_event_link value isn't empty, the event link is removed.
 			'view_end_date' => '', // If the view_end_date value isn't empty, the end date is displayed, using the value of view_end_date as the delimiter string after the start date.
 			'months_title'	=> '', // If you have selected li-month, li-month-notitle in html_tags and want to set titles for each month, specify them in order from January "1:January Title, 2:February Title, ..."".
-			'debug'			=> '', // This is the debug option. If the value is an ID number in the page/post/archive, display the URL to retrieve data from Google Calendar via API at the specific page/post/archive.
 		);
 		if(!empty($atts_special_allow_options)):
 			$atts_options = array_merge($atts_options, $atts_special_allow_options);  // Overwrite the same options.
@@ -262,7 +261,6 @@ class gclv extends gclv_hash_tags{
 		$html_tag_class = $html_tag_class ?: $this->plugin_name;
 
 		$settings = get_option($this->set_op);	
-
 		$gc_data = $this->get_google_calendar_contents($atts); 
 		// get lang data.
 		$gc_data = $this->get_select_lang_data($gc_data, $atts); 
@@ -297,7 +295,6 @@ class gclv extends gclv_hash_tags{
 		endif;
 
 		$out  = ''; 
-
 		$element_count = 0; 
 		$match = array();
 		if( isset($gc_data['items']) ): 
@@ -339,6 +336,7 @@ class gclv extends gclv_hash_tags{
 				$end_date_num = $this->wp_datetime_converter_get_date_from_gmt("Ymd", $end_dateTime, "", "end");
 				$end_date_value = $this->wp_datetime_converter_get_date_from_gmt($date_format, $end_dateTime, "", "end");
 				$end_date_time = $this->wp_datetime_converter_get_date_from_gmt($time_format, $end_dateTime, "", "end");
+
 				$holding_flag = false;
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 				$gc_link = "";
@@ -521,7 +519,7 @@ class gclv extends gclv_hash_tags{
 		if ( preg_match('/-month$/', $html_tag) ):
 			$out .= '</ul>';
 		endif;
-
+		
 		return $out;
 	}
 	
@@ -640,17 +638,12 @@ class gclv extends gclv_hash_tags{
 			endforeach;
 		endif;
 		$url = $g_url .'&'.implode('&', $params);
-
+ 
 		// Fixed the warning : Ref. https://qiita.com/kawaguchi_011/items/29cc3811b2bc2ce2d85e
 		$fgc_context = stream_context_create(array(
 			 'http' => array('ignore_errors' => true),
 		));
-		if(isset($debug) && is_numeric($debug) && (is_page(intval($debug)) || is_single(intval($debug)) || is_archive(intval($debug))) ):
-			var_dump($url);
-			if (!empty($urls)):
-				var_dump($urls);
-			endif;
-		endif;
+//		var_dump($url);
 		$urls_json = array();
 		$urls_results = array();
 		foreach($urls as $key=>$value):
