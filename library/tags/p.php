@@ -20,7 +20,7 @@ if ( isset($view_location) && !empty($view_location) ):
 	if( isset($view_location_name) && !empty($view_location_name) ): 
 	    $location_header_name = $view_location_name;
 	 else:
-	    $location_header_name = __("Location:", $this->plugin_name);
+	    $location_header_name = __("Location:", 'list-view-google-calendar');
 	 endif;
 $out_temp .= <<< ___EOF___
 <br/><span class='{$html_tag_class}_location_head'>$location_header_name</span> <span class='{$html_tag_class}_location'>$gc_location</span>

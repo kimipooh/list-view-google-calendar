@@ -4,8 +4,8 @@ Donate link:
 Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
-Tested up to: 6.8.2
-Stable tag: 7.3.2
+Tested up to: 6.8
+Stable tag: 7.3.3
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,7 +17,7 @@ The plugin is to create a shortcode for displaying the list view of public Googl
 
 = Document =
 
-Please see the [documentation](https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view) in detail. [Japanese documentation](https://info.cseas.kyoto-u.ac.jp/links-ja/plugin-ja/wordpress-dev-info/google-calendar-list-view)
+Please see the [documentation](https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/list-view-google-calendar-en) in detail. [Japanese documentation](https://info.cseas.kyoto-u.ac.jp/links-ja/plugin-ja/wordpress-dev-info/list-view-google-calendar)
 
 == Installation ==
 
@@ -78,6 +78,10 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.3.3 =
+* Tested up to: WordPress 6.8
+* Fixed code related to translation in WordPress.
+
 = 7.3.2 =
 * Changed the plugin name to "List View Google Calendar".
 

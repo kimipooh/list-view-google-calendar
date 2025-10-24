@@ -28,7 +28,7 @@ if ( isset($view_location) && !empty($view_location) ):
 	if( isset($view_location_name) && !empty($view_location_name) ): 
 	    $location_header_name = $view_location_name;
 	 else:
-	    $location_header_name = __("Location:", $this->plugin_name);
+	    $location_header_name = __("Location:", 'list-view-google-calendar');
 	 endif;
 	$pre_start_date_value_style = '';    
 $out_temp .= <<< ___EOF___
