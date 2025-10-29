@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8
-Stable tag: 7.3.3
+Stable tag: 7.4.0
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,14 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.4.0 =
+* Removed the old form of load_plugin_textdomain.
+* Change cURL functions to wp_remote_get function.
+* Improved date handling.
+* Added some security codes.
+* Removed heredoc and nowdoc syntax ("<<<")
+
+
 = 7.3.3 =
 * Tested up to: WordPress 6.8
 * Fixed code related to translation in WordPress.

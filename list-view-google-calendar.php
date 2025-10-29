@@ -1,15 +1,14 @@
 <?php
 /*
 Plugin Name: List View Google Calendar
-Plugin URI: 
+Plugin URI: https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/list-view-google-calendar-en
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.3.3
+Version: 7.4.0
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: list-view-google-calendar
-Domain Path: /lang
 */
 
 require_once( plugin_dir_path(__FILE__) . '/includes/hash_tags.php');
@@ -38,7 +37,6 @@ class gclv extends gclv_hash_tags{
 		'noEventMessage' =>'',
 		'fix-timezone-offset' => '',  // Corrected values for time zone deviations
 	);
-	var $lang_dir = 'lang';	// Language folder name
 	var $settings;
 	
 	function __construct(){
@@ -48,17 +46,11 @@ class gclv extends gclv_hash_tags{
 		register_deactivation_hook(__FILE__, array(&$this, 'uninstaller'));
 		// Add Setting to WordPress 'Settings' menu. 
 		add_action('admin_menu', array(&$this, 'add_to_settings_menu'));
-		add_action('plugins_loaded', array(&$this,'enable_language_translation'));
-		
 		add_shortcode($this->plugin_shortcode, array(&$this, 'shortcodes'));
-	}
-	public function enable_language_translation(){
-		load_plugin_textdomain('list-view-google-calendar')
-		or load_plugin_textdomain('list-view-google-calendar', false, dirname( plugin_basename( __FILE__ ) ) . '/' . $this->lang_dir . '/');
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 733;
+		$this->settings['version'] = 740;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -153,33 +145,75 @@ class gclv extends gclv_hash_tags{
 		if(empty($dateTime)) return $dateTime;
 		if(empty($timezone_set)) return $timezone_set;
 
+		$tz_obj = new DateTimeZone($timezone_set);
+
 		if($dateTime == strtolower("today")):
-			$date_obj = new DateTime('', new DateTimeZone($timezone_set)); // Set timezone.
+			$date_obj = new DateTime('', $tz_obj); // Set timezone.
 		else:
-			$date_obj = new DateTime($dateTime, new DateTimeZone($timezone_set)); // Set timezone.
+			$date_obj = new DateTime($dateTime, $tz_obj); // Set timezone.
 		endif;
+
 		if($flag == strtolower("start")):
-			$date_num = mktime(0,0,0,$date_obj->format("m"), $date_obj->format("d"), $date_obj->format("Y"));
+			$date_obj->setTime(0, 0, 0);
+			//$date_num = mktime(0,0,0,$date_obj->format("m"), $date_obj->format("d"), $date_obj->format("Y"));
 		else:
-			$date_num = mktime(23,59,59,$date_obj->format("m"), $date_obj->format("d"), $date_obj->format("Y"));
+			$date_obj->setTime(23, 59, 59);
+			//$date_num = mktime(23,59,59,$date_obj->format("m"), $date_obj->format("d"), $date_obj->format("Y"));
 		endif;
-		$date_obj = new DateTime(date('Y-m-d H:i:s', $date_num), new DateTimeZone($timezone_set));
+		//$date_obj = new DateTime(date('Y-m-d H:i:s', $date_num), new DateTimeZone($timezone_set));
 		
 		$settings = get_option($this->set_op);
 		if(isset($settings['google_calendar']) && is_array($settings['google_calendar'])):
 			$this->google_calendar = $settings['google_calendar'];
 		endif;
 		if(isset($this->google_calendar['fix-timezone-offset']) && !empty($this->google_calendar['fix-timezone-offset'])):
-			if(@DateInterval::createFromDateString($this->google_calendar['fix-timezone-offset'])):
-				$date_obj->modify($this->google_calendar['fix-timezone-offset']);
-			endif;
+			try {
+            	$interval = DateInterval::createFromDateString($this->google_calendar['fix-timezone-offset']);
+            	if ($interval) {
+                	$date_obj->modify($this->google_calendar['fix-timezone-offset']);
+            	}
+        	} catch (Exception $e) {
+            // error_log('Invalid date interval string: ' . $this->google_calendar['fix-timezone-offset']);
+        	}
+			//if(@DateInterval::createFromDateString($this->google_calendar['fix-timezone-offset'])):
+			//	$date_obj->modify($this->google_calendar['fix-timezone-offset']);
+			//endif;
 		endif;		
 		return $date_obj->format($format);
 	}
 
 	// Mapping month names with WordPress Core's translation feature 
 	public function convert_language_of_month_name(){
-		  $convert_month = array(
+		global $wp_locale;
+		if( ! isset($wp_locale->month) ):
+			return [];
+		endif;
+		$translated_months = $wp_locale->month;
+
+		$convert_month = [];
+		$english_months = [
+            1 => "January",
+            2 => "February",
+            3 => "March",
+            4 => "April",
+            5 => "May",
+            6 => "June",
+            7 => "July",
+            8 => "August",
+            9 => "September",
+            10 => "October",
+            11 => "November",
+            12 => "December"
+        ];
+		foreach ( $translated_months as $num=> $translated_name ) {
+            if ( isset( $english_months[ intval($num) ] ) ) {
+                $convert_month[ $english_months[ intval($num) ] ] = $translated_name;
+            } else {
+                $convert_month[ $english_months[ intval($num) ] ] = $english_months[ intval($num) ]; 
+            }
+        }
+		/*
+		$convert_month = array(
 		  	"January" => __("January"),
   			"February"	=> __("February"),
   			"March" => __("March"),
@@ -193,7 +227,7 @@ class gclv extends gclv_hash_tags{
   			"November" => __("November"),
   			"December" => __("December")
   		);
-  		  		
+	    */		
  		return $convert_month;
 	}
 	// Get month title
@@ -456,7 +490,7 @@ class gclv extends gclv_hash_tags{
 					$gc_description_title = str_replace(
 						array("<br/>","<br />", "<br>", "<p>", "</p>"),
 						 '&#13;&#10;', $gc_description_title);
-					$gc_description_title = strip_tags($gc_description_title);
+					$gc_description_title = wp_strip_all_tags($gc_description_title);
 					$gc_description_title = str_replace('&#13;&#10;&#13;&#10;&#13;&#10;', '&#13;&#10;', $gc_description_title);
 					// Limit the output to the title attribute to 1024 bytes.
 					if( function_exists("mb_strcut") ):
@@ -712,7 +746,13 @@ class gclv extends gclv_hash_tags{
 		return $json;
 	}
 	public function add_to_settings_menu(){
-		add_options_page(__('List View Google Calendar Settings', 'list-view-google-calendar'), __('List View Google Calendar Settings', 'list-view-google-calendar'), 'manage_options', __FILE__,array(&$this,'admin_settings_page'));
+		add_options_page(
+			__('List View Google Calendar Settings', 'list-view-google-calendar'), 
+			__('List View Google Calendar Settings', 'list-view-google-calendar'),
+			'manage_options',
+			'list-view-google-calendar',
+			array(&$this,'admin_settings_page')
+		);
 	}
 
 	// Processing Setting menu for the plugin.
@@ -730,48 +770,52 @@ class gclv extends gclv_hash_tags{
 		endif;
 		$google_calendar_flag = false;
 
-		if(isset($_POST["gclv-form"]) && $_POST["gclv-form"]):
+		$nonce_value = '';
+		if(isset($_POST["gclv-form"])):
+	    	$nonce_value = sanitize_text_field( wp_unslash( $_POST['gclv-form'] ) );
+		endif;
+		if(wp_verify_nonce($nonce_value, "gclv-nonce-key")):
 			if(check_admin_referer("gclv-nonce-key", "gclv-form")):
 				// GET setting data in Settings.
 				if(isset($_POST['google-calendar-api-key'])):
-					$this->google_calendar['api-key'] =  wp_strip_all_tags($_POST['google-calendar-api-key']);
+					$this->google_calendar['api-key'] =  wp_strip_all_tags( wp_unslash($_POST['google-calendar-api-key']) );
 					$google_calendar_flag = true;
 				endif;
 				if(isset($_POST['google-calendar-id'])):
-					$this->google_calendar['id'] =  wp_strip_all_tags($_POST['google-calendar-id']);
+					$this->google_calendar['id'] =  wp_strip_all_tags( wp_unslash($_POST['google-calendar-id']) );
 					$google_calendar_flag = true;
 				endif;
 				if(isset($_POST['google-calendar-start-date'])):
-					$this->google_calendar['start-date'] =  wp_strip_all_tags($_POST['google-calendar-start-date']);
+					$this->google_calendar['start-date'] =  wp_strip_all_tags( wp_unslash($_POST['google-calendar-start-date']) );
 					$google_calendar_flag = true;
 				endif;
 				if(isset($_POST['google-calendar-end-date'])):
-					$this->google_calendar['end-date'] =  wp_strip_all_tags($_POST['google-calendar-end-date']);
+					$this->google_calendar['end-date'] =  wp_strip_all_tags( wp_unslash($_POST['google-calendar-end-date']) );
 					$google_calendar_flag = true;
 				endif;
 				if(isset($_POST['google-calendar-maxResults'])): 
 					// maxResults 
 					if((int)$_POST['google-calendar-maxResults'] > 0 && (int)($_POST['google-calendar-maxResults'] <= 2500)):
-						$this->google_calendar['maxResults'] = (int) wp_strip_all_tags($_POST['google-calendar-maxResults']);
+						$this->google_calendar['maxResults'] = (int) wp_strip_all_tags( wp_unslash($_POST['google-calendar-maxResults']) );
 					else:
 						$this->google_calendar['maxResults'] = $this->default_maxResults;
 					endif;
 					$google_calendar_flag = true;
 				endif;
 				if(isset($_POST['google-calendar-orderbysort'])):
-					$this->google_calendar['orderbysort'] =  wp_strip_all_tags($_POST['google-calendar-orderbysort']);
+					$this->google_calendar['orderbysort'] =  wp_strip_all_tags( wp_unslash($_POST['google-calendar-orderbysort']) );
 					$google_calendar_flag = true;
 				endif;
 				if(isset($_POST['google-calendar-html_tag'])):
-					$this->google_calendar['html_tag'] =  wp_strip_all_tags($_POST['google-calendar-html_tag'] ? $_POST['google-calendar-html_tag'] : $this->default_html_tag);
+					$this->google_calendar['html_tag'] =  wp_strip_all_tags( wp_unslash($_POST['google-calendar-html_tag']) ? wp_unslash($_POST['google-calendar-html_tag']) : $this->default_html_tag);
 					$google_calendar_flag = true;
 				endif;
 				if(isset($_POST['google-calendar-no-event-message'])):
-					$this->google_calendar['noEventMessage'] =  wp_strip_all_tags($_POST['google-calendar-no-event-message'] ? $_POST['google-calendar-no-event-message'] : $this->default_noEventMessage);
+					$this->google_calendar['noEventMessage'] =  wp_strip_all_tags( wp_unslash($_POST['google-calendar-no-event-message']) ? wp_unslash($_POST['google-calendar-no-event-message']) : $this->default_noEventMessage);
 					$google_calendar_flag = true;
 				endif;
 				if(isset($_POST['google-calendar-fix-timezone-offset'])):
-					$this->google_calendar['fix-timezone-offset'] =  wp_strip_all_tags($_POST['google-calendar-fix-timezone-offset'] ? $_POST['google-calendar-fix-timezone-offset'] : $this->default_fix_timezone_offset);
+					$this->google_calendar['fix-timezone-offset'] =  wp_strip_all_tags( wp_unslash($_POST['google-calendar-fix-timezone-offset']) ? wp_unslash($_POST['google-calendar-fix-timezone-offset']) : $this->default_fix_timezone_offset);
 					$google_calendar_flag = true;
 				endif;
 			endif;
@@ -784,90 +828,96 @@ class gclv extends gclv_hash_tags{
 		endif;
 ?>
 <div id="add_mime_media_admin_menu">
-  <h2><?php _e('List View Google Calendar Settings', 'list-view-google-calendar'); ?></h2>
+  <h2><?php esc_html_e('List View Google Calendar Settings', 'list-view-google-calendar'); ?></h2>
   
   <form method="post" action="">
 	<?php // for CSRF (Cross-Site Request Forgery): https://propansystem.net/blog/2018/02/20/post-6279/
 		wp_nonce_field("gclv-nonce-key", "gclv-form"); ?>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
-       <legend><h3><?php _e('How to use it.', 'list-view-google-calendar'); ?></h3></legend>
-       <div style="overflow:noscroll; height: 70px;">
-         <p><?php _e('Shortcode: ', 'list-view-google-calendar'); ?><strong><?php print '[' . $this->plugin_shortcode .']'; ?></strong> <?php _e('(Put the shortcode on a post or page.)', 'list-view-google-calendar'); ?></p>
-         <p><?php _e('The handling manual in detail is <a href="https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view" target="_blank">here</a>.', 'list-view-google-calendar'); ?>
+       <legend><h3><?php esc_html_e('How to use it.', 'list-view-google-calendar'); ?></h3></legend>
+       <div style="overflow:noscroll; height: 80px;">
+         <p><?php esc_html_e('Shortcode: ', 'list-view-google-calendar'); ?><strong><?php print '[' . esc_html($this->plugin_shortcode) .']'; ?></strong> <?php esc_html_e('(Put the shortcode on a post or page.)', 'list-view-google-calendar'); ?></p>
+         <p><?php esc_html_e('The handling manual in detail is here.', 'list-view-google-calendar'); ?><br/>
+		 <a href="https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/list-view-google-calendar-en" target="_blank">English</a>,
+		<a href="https://info.cseas.kyoto-u.ac.jp/links-ja/plugin-ja/wordpress-dev-info/list-view-google-calendar" target="_blank">Japanese</a></p>
        </div>
      </fieldset>
      <br/>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
-        <legend><h3><?php _e('Google Calendar API Settings', 'list-view-google-calendar'); ?></h3></legend>
+        <legend><h3><?php esc_html_e('Google Calendar API Settings', 'list-view-google-calendar'); ?></h3></legend>
         <div style="overflow:noscroll; height: 550px;">
          <br/>
          <table>
-            <tr><td><strong>1. <?php _e('Google Calendar API Key: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-api-key" type="text" value="<?php print esc_attr($this->google_calendar['api-key']);?>" size="60" maxlength="100"/> </td></tr>
-            <tr><td><strong>2. <?php _e('Google Calendar ID: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-id" type="text" value="<?php print esc_attr($this->google_calendar['id']);?>" size="60" maxlength="100"/></td></tr>
-            <tr><td><strong>3. <?php _e('Start Date (YYYY-MM-DD/ALL): ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-start-date" type="text" value="<?php print esc_attr($this->google_calendar['start-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a> date format is supported.)', 'list-view-google-calendar'); ?></td></tr>
-            <tr><td><strong>4. <?php _e('End Date (YYYY-MM-DD): ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-end-date" type="text" value="<?php print esc_attr($this->google_calendar['end-date']);?>" size="30" maxlength="100"/> <?php _e('(<a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a> date format is supported.)', 'list-view-google-calendar'); ?></td></tr>
-            <tr><td><strong>5. <?php _e('maxResults (Default value is 10): ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-maxResults" type="text" value="<?php print esc_attr($this->google_calendar['maxResults'] ? $this->google_calendar['maxResults'] : $this->default_maxResults);?>" size="30" maxlength="100"/> <?php _e('(0 > maxResults <= 2500 | <a href="https://developers.google.com/google-apps/calendar/v3/reference/events/list" target="_blank">Events: list</a>)', 'list-view-google-calendar'); ?></td></tr>
+            <tr><td><strong>1. <?php esc_html_e('Google Calendar API Key: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-api-key" type="text" value="<?php print esc_attr($this->google_calendar['api-key']);?>" size="60" maxlength="100"/> </td></tr>
+            <tr><td><strong>2. <?php esc_html_e('Google Calendar ID: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-id" type="text" value="<?php print esc_attr($this->google_calendar['id']);?>" size="60" maxlength="100"/></td></tr>
+            <tr><td><strong>3. <?php esc_html_e('Start Date (YYYY-MM-DD/ALL): ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-start-date" type="text" value="<?php print esc_attr($this->google_calendar['start-date']);?>" size="30" maxlength="100"/> Reference: <a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a></td></tr>
+            <tr><td><strong>4. <?php esc_html_e('End Date (YYYY-MM-DD): ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-end-date" type="text" value="<?php print esc_attr($this->google_calendar['end-date']);?>" size="30" maxlength="100"/> Reference: <a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a></td></tr>
+            <tr><td><strong>5. <?php esc_html_e('maxResults (Default value is 10): ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-maxResults" type="text" value="<?php print esc_attr($this->google_calendar['maxResults'] ? $this->google_calendar['maxResults'] : $this->default_maxResults);?>" size="30" maxlength="100"/> <?php esc_html_e('(0 > maxResults <= 2500)', 'list-view-google-calendar'); ?>, Reference: <a href="https://developers.google.com/google-apps/calendar/v3/reference/events/list" target="_blank">Events: list</a></td></tr>
             <tr><td colspan="2">
              <ol>
-               <li><?php _e('Get Google Calendar API Key from <a href="https://console.developers.google.com/" target="_blank">Google Developer Console</a> (Reference: <a href="https://docs.simplecalendar.io/google-api-key/?utm_source=inside-plugin&utm_medium=link&utm_campaign=core-plugin&utm_content=settings-link" target="_blank">Creating Google API Key</a> by Simple Calendar Documentation)', 'list-view-google-calendar'); ?></li>
-               <li><?php _e('Get Google Calendar ID from a public Google Calendar setting (Reference: <a href="https://docs.simplecalendar.io/find-google-calendar-id/" target="_blank">Finding Your Google Calendar ID</a> by Simple Calendar Documentation', 'list-view-google-calendar'); ?></li>
-               <li><?php _e('If "Start Date" or "End Date" are setting up, get Google Calendar events from "Start Date" to "End Date".', 'list-view-google-calendar'); ?> <?php _e('Default value is empty (start_date value = current date).', 'list-view-google-calendar'); ?></li>
-               <li><?php _e('"Start Date" and "End Date" can use the value of "now" and "ALL". "now" means current date. "ALL" means unlimited.', 'list-view-google-calendar'); ?> <?php _e('"Start Date" and "End Date" can use <a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a> data format. "-2 days" means 2 days ago from current time. "+1 days" means 1 day later from current time. In detail, please see <a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a> help.', 'list-view-google-calendar'); ?></li>
-               <li><?php _e('maxResults is maximum number of events returned on one result page. If multiple calendars are specified, this plugin gets maxResults number of events from each calendars and sort by order into them. And then, it picks up maxResults number of latest events from sorted events. (ex. maxResults = 10, Calendar A/B. It gets total 20 events from Calendar A (10 events) and Calendar B(10 events) and 20 events are sorted by order, and then picked up latest 10 events).', 'list-view-google-calendar'); ?></li>
+               <li><?php esc_html_e('Get Google Calendar API Key from Google Developer Console.', 'list-view-google-calendar'); ?><br/>
+				* Reference: <a href="https://docs.simplecalendar.io/google-api-key/?utm_source=inside-plugin&utm_medium=link&utm_campaign=core-plugin&utm_content=settings-link" target="_blank">Creating Google API Key</a> by Simple Calendar Documentation</li>
+               <li><?php esc_html_e('Get Google Calendar ID from a public Google Calendar setting.', 'list-view-google-calendar'); ?><br/>
+				* Reference: <a href="https://docs.simplecalendar.io/find-google-calendar-id/" target="_blank">Finding Your Google Calendar ID</a> by Simple Calendar Documentation</li>
+               <li><?php esc_html_e('If "Start Date" or "End Date" are setting up, get Google Calendar events from "Start Date" to "End Date".', 'list-view-google-calendar'); ?> <?php esc_html_e('Default value is empty (start_date value = current date).', 'list-view-google-calendar'); ?></li>
+               <li><?php esc_html_e('"Start Date" and "End Date" can use the value of "now" and "ALL". "now" means current date. "ALL" means unlimited.', 'list-view-google-calendar'); ?> <?php esc_html_e('"Start Date" and "End Date" can use "datetime" data format. "-2 days" means 2 days ago from current time. "+1 days" means 1 day later from current time.', 'list-view-google-calendar'); ?><br/>
+				* Reference: <a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">datetime</a> (PHP document)</li>
+               <li><?php esc_html_e('maxResults is maximum number of events returned on one result page. If multiple calendars are specified, this plugin gets maxResults number of events from each calendars and sort by order into them. And then, it picks up maxResults number of latest events from sorted events. (ex. maxResults = 10, Calendar A/B. It gets total 20 events from Calendar A (10 events) and Calendar B(10 events) and 20 events are sorted by order, and then picked up latest 10 events).', 'list-view-google-calendar'); ?></li>
              </ol>
             </td></tr>
          </table>
-         <input type="submit" value="<?php _e('Save', 'list-view-google-calendar');  ?>" />
+         <input type="submit" value="<?php esc_html_e('Save', 'list-view-google-calendar');  ?>" />
          <br/>
         </div>
      </fieldset>
      <br/>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
-        <legend><h3><?php _e('General Settings', 'list-view-google-calendar'); ?></h3></legend>
-        <div style="overflow:noscroll; height: 450px;">
+        <legend><h3><?php esc_html_e('General Settings', 'list-view-google-calendar'); ?></h3></legend>
+        <div style="overflow:noscroll; height: 480px;">
          <br/>
          <table>
-           <tr><td><strong>1. <?php _e('Order by Sort: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-orderbysort" type="radio" value="ascending" <?php if(strtolower($this->google_calendar['orderbysort']) !== 'descending') print 'checked';?>/>Ascending <input name="google-calendar-orderbysort" type="radio" value="descending" <?php if(strtolower($this->google_calendar['orderbysort']) === 'descending') print 'checked';?>/>Descending</td></tr>
-           <tr><td><strong>2. <?php _e('HTML tag: ', 'list-view-google-calendar'); ?></strong></td><td>
+           <tr><td><strong>1. <?php esc_html_e('Order by Sort: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-orderbysort" type="radio" value="ascending" <?php if(strtolower($this->google_calendar['orderbysort']) !== 'descending') print 'checked';?>/>Ascending <input name="google-calendar-orderbysort" type="radio" value="descending" <?php if(strtolower($this->google_calendar['orderbysort']) === 'descending') print 'checked';?>/>Descending</td></tr>
+           <tr><td><strong>2. <?php esc_html_e('HTML tag: ', 'list-view-google-calendar'); ?></strong></td><td>
            <?php foreach($this->html_tags as $html_tag): ?>
            <input name="google-calendar-html_tag" type="radio" value="<?php print esc_attr($html_tag); ?>" <?php if($this->google_calendar['html_tag'] === $html_tag) print 'checked'; elseif(empty($this->google_calendar['html_tag']) && $this->default_html_tag === $html_tag) print 'checked'; ?>/><?php print esc_html('<' . $html_tag . '>');?> 
            <?php endforeach; ?></td></tr>
-           <tr><td><strong>3. <?php _e('No Event Message: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-no-event-message" type="text" value="<?php print  esc_attr($this->google_calendar['noEventMessage']);?>" size="60" maxlength="100"/></td></tr>
-           <tr><td><strong>4. <?php _e('Fix Timezone Offset: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-fix-timezone-offset" type="text" value="<?php print  esc_attr($this->google_calendar['fix-timezone-offset']);?>" size="60" maxlength="100"/ placeholder="ex. +3 hours +10 minutes -30 seconds(default is empty value)"></td></tr>
+           <tr><td><strong>3. <?php esc_html_e('No Event Message: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-no-event-message" type="text" value="<?php print  esc_attr($this->google_calendar['noEventMessage']);?>" size="60" maxlength="100"/></td></tr>
+           <tr><td><strong>4. <?php esc_html_e('Fix Timezone Offset: ', 'list-view-google-calendar'); ?></strong></td><td><input name="google-calendar-fix-timezone-offset" type="text" value="<?php print  esc_attr($this->google_calendar['fix-timezone-offset']);?>" size="60" maxlength="100"/ placeholder="ex. +3 hours +10 minutes -30 seconds(default is empty value)"></td></tr>
            <tr><td colspan="2">
               <ol>
-               <li><?php _e('Order by Sort behaves like "ordersort" by Google Calendar API v2.', 'list-view-google-calendar'); ?></li>
-               <li><?php _e('HTML tag is used by the output Google Calendar events. The tag class is "list-view-google-calendar".', 'list-view-google-calendar'); ?></li>
-               <li><?php _e('Change the message when there are no events. If the value is empty, "There are no events." is set. Else if the value is "none", the message is hidden. If "no_event_message" shortcode option is set, the message is overwritten by the shortcode message', 'list-view-google-calendar'); ?></li>
-               <li><?php _e('If you cannot solve the timezone issue, you can manually shift the hours, minutes, and seconds by setting the value of "Fix Timezone Offset".', 'list-view-google-calendar'); ?>
-               <?php _e('<br/>For example<br/>
+               <li><?php esc_html_e('Order by Sort behaves like "ordersort" by Google Calendar API v2.', 'list-view-google-calendar'); ?></li>
+               <li><?php esc_html_e('HTML tag is used by the output Google Calendar events. The tag class is "list-view-google-calendar".', 'list-view-google-calendar'); ?></li>
+               <li><?php esc_html_e('Change the message when there are no events. If the value is empty, "There are no events." is set. Else if the value is "none", the message is hidden. If "no_event_message" shortcode option is set, the message is overwritten by the shortcode message', 'list-view-google-calendar'); ?></li>
+               <li><?php esc_html_e('If you cannot solve the timezone issue, you can manually shift the hours, minutes, and seconds by setting the value of "Fix Timezone Offset".', 'list-view-google-calendar'); ?>
+               <br/><?php esc_html_e('For example','list-view-google-calendar'); ?><br/>
 <ul>
-<li>+3 hours = 3 hours later</li>
-<li>+10 minutes = 10 minutes later</li>
-<li>-30 seconds = 30 seconds before</li>
+<li><?php esc_html_e('+3 hours = 3 hours later','list-view-google-calendar'); ?></li>
+<li><?php esc_html_e('+10 minutes = 10 minutes later','list-view-google-calendar'); ?></li>
+<li><?php esc_html_e('30 seconds = 30 seconds before','list-view-google-calendar'); ?></li>
 </ul>
-Multiple settings can be made by separating them with spaces. hours/minutes/seconds can be singular or plural. In detail, please see <a href="https://www.php.net/manual/en/datetime.modify.php" target="_blank">date_modity</a>.', 'list-view-google-calendar'); ?></li>
+<?php esc_html_e('Multiple settings can be made by separating them with spaces. hours/minutes/seconds can be singular or plural.', 'list-view-google-calendar'); ?><br/>
+* Reference: <a href="https://www.php.net/manual/en/datetime.modify.php" target="_blank">date_modity</a> (PHP document).</li>
               </ol>
            </td></tr>
          </table>
-         <input type="submit" value="<?php _e('Save', 'list-view-google-calendar');  ?>" />
+         <input type="submit" value="<?php esc_html_e('Save', 'list-view-google-calendar');  ?>" />
          <br/>
         </div>
      </fieldset>
      <br/>
      <fieldset style="border:1px solid #777777; width: 800px; padding-left: 6px;">
-        <legend><h3><?php _e('Feature Expansion &amp; Other notice', 'list-view-google-calendar'); ?></h3></legend>
+        <legend><h3><?php esc_html_e('Feature Expansion &amp; Other notice', 'list-view-google-calendar'); ?></h3></legend>
         <div style="overflow:noscroll; height: 200px;">
          <br/>
-         <?php _e('The plugin is the following hooks', 'list-view-google-calendar'); ?>
+         <?php esc_html_e('The plugin is the following hooks', 'list-view-google-calendar'); ?>
          <ol>
-           <li><strong>lvgc_each_output_data</strong> <?php _e('can handled each output data.', 'list-view-google-calendar'); ?></li>
+           <li><strong>lvgc_each_output_data</strong> <?php esc_html_e('can handled each output data.', 'list-view-google-calendar'); ?></li>
          </ol>
 
          <ul>
-           <li><?php _e('If you use above hooks, you must set "hook_secret_key" option in the shortcode. And you need to return "hook_secrey_key" value in the hook. Please see the <a href="https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/google-calendar-list-view" target="_blank">document</a>.', 'list-view-google-calendar'); ?></li>
-           <li><?php _e('If you emphasize a holding event, set class="list-view-google-calendar_holding" in the html tag.', 'list-view-google-calendar'); ?></li>
-           <li><?php _e('If you want to customize the value using a hook each a shortcode, id can use a unique key.', 'list-view-google-calendar'); ?></li>
+           <li><?php esc_html_e('If you use above hooks, you must set "hook_secret_key" option in the shortcode. And you need to return "hook_secrey_key" value in the hook.', 'list-view-google-calendar'); ?></li>
+           <li><?php esc_html_e('If you emphasize a holding event, set class="list-view-google-calendar_holding" in the html tag.', 'list-view-google-calendar'); ?></li>
+           <li><?php esc_html_e('If you want to customize the value using a hook each a shortcode, id can use a unique key.', 'list-view-google-calendar'); ?></li>
          </ul>
 
         </div>
@@ -877,7 +927,7 @@ Multiple settings can be made by separating them with spaces. hours/minutes/seco
 <?php 
 		if($google_calendar_flag):
 ?>
-<div class="<?php print $this->plugin_name;?>_updated"><p><strong><?php _e('Updated', 'list-view-google-calendar'); ?></strong></p></div>
+<div class="<?php print esc_html($this->plugin_name);?>_updated"><p><strong><?php esc_html_e('Updated', 'list-view-google-calendar'); ?></strong></p></div>
 
 <?php 
 		endif;

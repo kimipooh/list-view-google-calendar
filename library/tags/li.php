@@ -2,15 +2,15 @@
 
 if ( isset($no_event_link) && !empty($no_event_link) ): 
 
-$out_temp = <<< ___EOF___
- <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp <span class="{$html_tag_class}_title" title="$gc_description_title">$gc_title</span>
-___EOF___;
+$out_temp = "
+ <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp <span class='{$html_tag_class}_title' title='$gc_description_title'>$gc_title</span>
+";
 
 else:
 
-$out_temp = <<< ___EOF___
- <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp <a target="_blank" class='{$html_tag_class}_link' href='$gc_link' title="$gc_description_title">$gc_title</a>
-___EOF___;
+$out_temp = "
+ <li class='{$html_tag_class}_item'><span class='{$html_tag_class}_date'>$start_end_date_value</span> $output_category_temp <a target='_blank' class='{$html_tag_class}_link' href='$gc_link' title='$gc_description_title'>$gc_title</a>
+";
 
 endif;
 
@@ -21,12 +21,11 @@ if ( isset($view_location) && !empty($view_location) ):
 	    $location_header_name = __("Location:", 'list-view-google-calendar');
 	 endif;
 
-$out_temp .= <<< ___EOF___
+$out_temp .= "
 <br/><span class='{$html_tag_class}_location_head'>$location_header_name</span> <span class='{$html_tag_class}_location'>$gc_location</span>
-___EOF___;
+";
 endif;
 
-$out_temp .= <<< ___EOF___
+$out_temp .= "
 </li>
-
-___EOF___;
+";

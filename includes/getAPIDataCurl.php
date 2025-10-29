@@ -1,30 +1,27 @@
 <?php 
-// Reference: https://qiita.com/shinkuFencer/items/d7546c8cbf3bbe86dab8
+// Reference: Changed cURL to wp_remote_get.
 function k_getAPIDataCurl($url){
-    $option = [
-        CURLOPT_RETURNTRANSFER => true, //Return as string
-        CURLOPT_TIMEOUT        => 3, // timeout period(second)
-        CURLOPT_REFERER        => get_permalink(), // Set to counteract the fact that curl returns no value on some servers when the referrer is not set.
+    $referer = get_permalink() ? get_permalink() : home_url('/');
+
+    $args = [
+        'timeout' => 3, // タイムアウト（秒）
+        'referer' => $referer, // リファラーを設定
     ];
 
-    $ch = curl_init($url);
-    curl_setopt_array($ch, $option);
+    $response = wp_remote_get($url, $args);
 
-    $json    = curl_exec($ch);
-    $info    = curl_getinfo($ch);
-    $errorNo = curl_errno($ch);
-
-    // Returns a blank array because it is an error except OK.
-    if ($errorNo !== CURLE_OK) {
-        // If you want to handle errors in detail, check with $errorNo.
-        // E.g. for timeouts, this can be checked with CURLE_OPERATION_TIMEDOUT.
+    if (is_wp_error($response)) {
+        // error_log('API request failed: ' . $response->get_error_message());
         return [];
     }
 
-    // Status codes other than 200 are regarded as failures and an empty array is returned.
-    if ($info['http_code'] !== 200) {
+    $http_code = wp_remote_retrieve_response_code($response);
+    if ($http_code !== 200) {
+        // error_log('API returned non-200 status: ' . $http_code);
         return [];
-    }
+    }   
+
+    $json = wp_remote_retrieve_body($response);
 
     return $json;
 }
