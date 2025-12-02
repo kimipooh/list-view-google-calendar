@@ -1,7 +1,8 @@
 <?php 
 // Reference: Changed cURL to wp_remote_get.
 function k_getAPIDataCurl($url){
-    $referer = get_permalink() ? get_permalink() : home_url('/');
+    //$referer = get_permalink() ? get_permalink() : home_url('/');
+    $referer = home_url('/');
 
     $args = [
         'timeout' => 3, // タイムアウト（秒）
