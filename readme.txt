@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.9
-Stable tag: 7.4.1
+Stable tag: 7.4.2
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,9 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.4.2 =
+* Fixed referer issue for getting API.
+
 = 7.4.1 =
 * Tested up to: WordPress 6.9
 * Fixed referer restriction for getting API.

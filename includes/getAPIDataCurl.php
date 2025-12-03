@@ -2,14 +2,14 @@
 // Reference: Changed cURL to wp_remote_get.
 function k_getAPIDataCurl($url){
     //$referer = get_permalink() ? get_permalink() : home_url('/');
-    $referer = home_url('/');
+    $referer = home_url();
 
     $args = [
         'timeout' => 3, // タイムアウト（秒）
-        'referer' => $referer, // リファラーを設定
+        'headers' => array('referer' => $referer), // リファラーを設定
     ];
 
-    $response = wp_remote_get($url, $args);
+    $response = wp_remote_get(esc_url_raw($url), $args);
 
     if (is_wp_error($response)) {
         // error_log('API request failed: ' . $response->get_error_message());
