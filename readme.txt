@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.9
-Stable tag: 7.4.3
+Stable tag: 7.4.4
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,10 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.4.4 = 
+* Fixed: Stored XSS vulnerability in event description (CVE-2026-2396) by applying proper attribute escaping.
+* Improved: Removed unnecessary title attribute processing to enhance security.
+
 = 7.4.3 = 
 * Fixed the issue where time_format was set to H:i for all-day events.
 

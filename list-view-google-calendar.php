@@ -3,7 +3,7 @@
 Plugin Name: List View Google Calendar
 Plugin URI: https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/list-view-google-calendar-en
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.4.3
+Version: 7.4.4
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 License: GPL v2  or later
@@ -50,7 +50,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 742;
+		$this->settings['version'] = 744;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -488,13 +488,7 @@ class gclv extends gclv_hash_tags{
 				// For title attribution
 				$gc_description_title = "";
 				if( isset($gc_description) && !empty($gc_description) ): 
-					// &#13;&#10;  is the HTML-encodeing CR+LF (line feed).
-					$gc_description_title = str_replace(array("\r\n", "\r", "\n"), "<br />", $gc_description);
-					$gc_description_title = str_replace(
-						array("<br/>","<br />", "<br>", "<p>", "</p>"),
-						 '&#13;&#10;', $gc_description_title);
-					$gc_description_title = wp_strip_all_tags($gc_description_title);
-					$gc_description_title = str_replace('&#13;&#10;&#13;&#10;&#13;&#10;', '&#13;&#10;', $gc_description_title);
+					$gc_description_title = esc_attr(wp_strip_all_tags($gc_description_title));
 					// Limit the output to the title attribute to 1024 bytes.
 					if( function_exists("mb_strcut") ):
 						$gc_description_title = mb_strcut($gc_description_title, 0, 1024);
