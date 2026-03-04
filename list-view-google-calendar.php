@@ -3,14 +3,16 @@
 Plugin Name: List View Google Calendar
 Plugin URI: https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/list-view-google-calendar-en
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.4.4
+Version: 7.4.5
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: list-view-google-calendar
 */
-
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 require_once( plugin_dir_path(__FILE__) . '/includes/hash_tags.php');
 require_once( plugin_dir_path(__FILE__) . '/includes/getAPIDataCurl.php');
 
@@ -50,7 +52,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 744;
+		$this->settings['version'] = 745;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -254,7 +256,7 @@ class gclv extends gclv_hash_tags{
 	 	endif;
 	}
 	public function shortcodes($atts){
-		$atts = $this->security_check_array($atts);
+		$atts = $this->sanitize_atts_array($atts);
 		// If there are not any options, $atts will be initialized by array().
 		if(empty($atts) || !is_array($atts)):
 			$atts = array();
@@ -300,8 +302,7 @@ class gclv extends gclv_hash_tags{
 		$gc_data = $this->get_google_calendar_contents($atts); 
 		// get lang data.
 		$gc_data = $this->get_select_lang_data($gc_data, $atts); 
-		// Security check for the hook (clean up ALL html tag except description).
-		$gc_data = $this->security_check_array($gc_data);
+		// Keep Google Calendar API data raw; escape at output templates.
 
 		if(!isset($settings['google_calendar'])):
 			$settings['google_calendar'] = array();
@@ -380,40 +381,40 @@ class gclv extends gclv_hash_tags{
 				if($today_date_num >= $start_date_num && $today_date_num <= $end_date_num) $holding_flag = true;
 				$gc_link = "";
 				if(isset($gc_value['htmlLink'])):
-					$gc_link = esc_url($gc_value['htmlLink']);
+					$gc_link = $gc_value['htmlLink'];
 					$gc_value['htmlLink'] = $gc_link;
-				endif;
+					endif;
 				$gc_title = "";
 				if(isset($gc_value['summary'])):
-					$gc_title = esc_html($gc_value['summary']);
+					$gc_title = $gc_value['summary'];
 					$gc_value['summary'] = $gc_title;
-				endif;
+					endif;
 				$gc_description = "";
 				if(isset($gc_value['description'])):
-					$gc_description = wp_kses_post($gc_value['description']);
+					$gc_description = $gc_value['description'];
 					$gc_value['description'] = $gc_description;
-				endif;
+					endif;
 				$gc_location = "";
 				if(isset($gc_value['location'])):
-					$gc_location = esc_html($gc_value['location']);
-					if(isset($atts['view_location']) && !empty($gc_location)):
-						// in case of view_location = "yes|link" in the shortcode opton,
+					$gc_location_raw = $gc_value['location'];
+					$gc_location = $gc_location_raw;
+					if(isset($atts['view_location']) && !empty($gc_location_raw)):
+						// Build a safe HTML fragment for location display (escaped as HTML here; final output is escaped in templates).
 						if($atts['view_location'] === 'yes|link'):
-							$url_preg='/http(s)?:\/\/[0-9a-z_,.:;&=+*%$#!?@()~\'\/-]+/i';
-							$gc_location  = preg_replace($url_preg, '<a target="_blank" href="$0">$0</a>', $gc_location);
+							$gc_location = make_clickable(esc_html($gc_location_raw));
 						elseif($atts['view_location'] === 'yes|map'):
-							$gc_location  = '<a target="_blank" href="https://www.google.com/maps/search/' . $gc_location . '"/>' . $gc_location . '</a>';
+							$map_url = 'https://www.google.com/maps/search/' . rawurlencode($gc_location_raw);
+							$gc_location = '<a target="_blank" rel="noopener noreferrer" href="' . esc_url($map_url) . '">' . esc_html($gc_location_raw) . '</a>';
 						elseif($atts['view_location'] === 'yes|link|map'):
 							$url_preg='/http(s)?:\/\/[0-9a-z_,.:;&=+*%$#!?@()~\'\/-]+/i';
-							if(preg_match($url_preg, $gc_location)):
-								$gc_location  = preg_replace($url_preg, '<a target="_blank" href="$0">$0</a>', $gc_location);
+							if(preg_match($url_preg, $gc_location_raw)):
+								$gc_location = make_clickable(esc_html($gc_location_raw));
 							else:
-								$gc_location  = '<a target="_blank" href="https://www.google.com/maps/search/' . $gc_location . '"/>' . $gc_location . '</a>';
+								$map_url = 'https://www.google.com/maps/search/' . rawurlencode($gc_location_raw);
+								$gc_location = '<a target="_blank" rel="noopener noreferrer" href="' . esc_url($map_url) . '">' . esc_html($gc_location_raw) . '</a>';
 							endif;
 						endif;
 					endif;
-					
-					
 					$gc_value['location'] = $gc_location;
 				endif;
 				$plugin_name = $this->plugin_name;
@@ -431,10 +432,10 @@ class gclv extends gclv_hash_tags{
 				$output_category_temp = '';
 				if(!empty($enable_view_category)):
 					if(!empty($hash_tags_type_title)):
-						$output_category_temp .= " <span class='{$html_tag_class}_category'>$hash_tags_type_title</span> ";
+						$output_category_temp .= " <span class='" . esc_attr($html_tag_class) . "_category'>" . esc_html($hash_tags_type_title) . "</span> ";
 					endif;
 					if(!empty($hash_tags_organizer_value)):
-						$output_category_temp .= " <span class='{$html_tag_class}_organizer'>$hash_tags_organizer_value</span> ";
+						$output_category_temp .= " <span class='" . esc_attr($html_tag_class) . "_organizer'>" . esc_html($hash_tags_organizer_value) . "</span> ";
 					endif;
 				endif;
 				$start_date_month_value = $this->wp_datetime_converter_get_date_from_gmt("Ym", $dateTime);
@@ -488,7 +489,7 @@ class gclv extends gclv_hash_tags{
 				// For title attribution
 				$gc_description_title = "";
 				if( isset($gc_description) && !empty($gc_description) ): 
-					$gc_description_title = esc_attr(wp_strip_all_tags($gc_description_title));
+					$gc_description_title = esc_attr(wp_strip_all_tags($gc_description));
 					// Limit the output to the title attribute to 1024 bytes.
 					if( function_exists("mb_strcut") ):
 						$gc_description_title = mb_strcut($gc_description_title, 0, 1024);
@@ -561,26 +562,28 @@ class gclv extends gclv_hash_tags{
 		return $out;
 	}
 	
-	// Remove all tag except "description" on Google Calendar
-	public function security_check_array($array){
-		static $exception = "";
+	/**
+	 * Sanitize shortcode attributes (input). Do not escape here.
+	 *
+	 * Output must be escaped at the point of output (templates) with
+	 * esc_html/esc_attr/esc_url.
+	 */
+	public function sanitize_atts_array($array){
 		if (empty($array)) return $array;
-		if(is_array($array)):
-				foreach($array as $k => $v):
-					if($k === "description") $exception = "description";
-					else $exception = "";
-					$array[$k] = $this->security_check_array($v);
-				endforeach;
-		else:
-			if($exception === "description")
-				$array = wp_kses_post($array); 
-			else
-				$array = esc_html(wp_strip_all_tags($array)); 
-		endif;
-		return $array;
+
+		if (is_array($array)) {
+			foreach ($array as $k => $v) {
+				$array[$k] = $this->sanitize_atts_array($v);
+			}
+			return $array;
+		}
+
+		// scalar
+		return sanitize_text_field($array);
 	}
+
 	public function get_google_calendar_contents($atts){
-		if($atts) extract($atts = $this->security_check_array($atts));
+		if($atts) extract($atts = $this->sanitize_atts_array($atts));
 
 		// Getting the settings from the setting menu.
 		$settings = get_option($this->set_op);

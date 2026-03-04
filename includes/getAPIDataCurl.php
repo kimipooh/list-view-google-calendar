@@ -1,4 +1,7 @@
 <?php 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 // Reference: Changed cURL to wp_remote_get.
 function k_getAPIDataCurl($url){
     //$referer = get_permalink() ? get_permalink() : home_url('/');

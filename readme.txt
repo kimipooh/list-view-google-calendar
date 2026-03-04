@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.9
-Stable tag: 7.4.4
+Stable tag: 7.4.5
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,13 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.4.5 = 
+* Security fix: Resolved a Stored Cross-Site Scripting (XSS) vulnerability related to event description output.
+* Removed early escaping of event data retrieved from the Google Calendar API.
+* Escaping is now applied at the point of output using context-appropriate WordPress escaping functions.
+* Shortcode attributes are sanitized using sanitize_text_field().
+* Improved external link handling to follow WordPress security best practices.
+
 = 7.4.4 = 
 * Fixed: Stored XSS vulnerability in event description (CVE-2026-2396) by applying proper attribute escaping.
 * Improved: Removed unnecessary title attribute processing to enhance security.
