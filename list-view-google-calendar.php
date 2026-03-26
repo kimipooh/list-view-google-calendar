@@ -3,7 +3,7 @@
 Plugin Name: List View Google Calendar
 Plugin URI: https://info.cseas.kyoto-u.ac.jp/en/links-en/plugin-en/wordpress-dev-info-en/list-view-google-calendar-en
 Description: The plugin is to create a shortcode for displaying the list view of a public Google Calendar.
-Version: 7.4.5
+Version: 7.4.6
 Author: Kimiya Kitani
 Author URI: https://profiles.wordpress.org/kimipooh/
 License: GPL v2  or later
@@ -52,7 +52,7 @@ class gclv extends gclv_hash_tags{
 	}
 	public function init_settings(){
 		$this->settings = $this->google_calendar; // Save to default settings.
-		$this->settings['version'] = 745;
+		$this->settings['version'] = 746;
 		$this->settings['db_version'] = 100;
 	}
 	public function installer(){
@@ -398,23 +398,24 @@ class gclv extends gclv_hash_tags{
 				if(isset($gc_value['location'])):
 					$gc_location_raw = $gc_value['location'];
 					$gc_location = $gc_location_raw;
-					if(isset($atts['view_location']) && !empty($gc_location_raw)):
-						// Build a safe HTML fragment for location display (escaped as HTML here; final output is escaped in templates).
+					if(isset($atts['view_location']) && !empty($atts['view_location']) && !empty($gc_location_raw)):
 						if($atts['view_location'] === 'yes|link'):
-							$gc_location = make_clickable(esc_html($gc_location_raw));
+							$gc_location = make_clickable($gc_location_raw);
 						elseif($atts['view_location'] === 'yes|map'):
 							$map_url = 'https://www.google.com/maps/search/' . rawurlencode($gc_location_raw);
 							$gc_location = '<a target="_blank" rel="noopener noreferrer" href="' . esc_url($map_url) . '">' . esc_html($gc_location_raw) . '</a>';
 						elseif($atts['view_location'] === 'yes|link|map'):
-							$url_preg='/http(s)?:\/\/[0-9a-z_,.:;&=+*%$#!?@()~\'\/-]+/i';
+							$url_preg = '/https?:\/\/[^\s<>"\']+/i';
 							if(preg_match($url_preg, $gc_location_raw)):
-								$gc_location = make_clickable(esc_html($gc_location_raw));
+								$gc_location = make_clickable($gc_location_raw);
 							else:
 								$map_url = 'https://www.google.com/maps/search/' . rawurlencode($gc_location_raw);
 								$gc_location = '<a target="_blank" rel="noopener noreferrer" href="' . esc_url($map_url) . '">' . esc_html($gc_location_raw) . '</a>';
 							endif;
+						else:
+							$gc_location = esc_html($gc_location_raw);
 						endif;
-					endif;
+					endif;				
 					$gc_value['location'] = $gc_location;
 				endif;
 				$plugin_name = $this->plugin_name;
