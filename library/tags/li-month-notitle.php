@@ -25,7 +25,7 @@ if( isset($month_value) && !empty($month_value) ) :
 		$month_value .= " " . $month_title;
 	endif;
 	$out_temp .= sprintf(
-		'<span style="font-weight: bold;" class="%1$s_item_month">%2$s</span><ul class="%1$s_item">',
+		' <span style="font-weight: bold;" class="%1$s_item_month">%2$s</span><ul class="%1$s_item">',
 		esc_attr($html_tag_class),
 		esc_html($month_value)
 	);
@@ -47,7 +47,7 @@ if ( isset($view_location) && !empty($view_location) ):
 		$location_header_name = __("Location:", 'list-view-google-calendar');
 	endif;
 	$out_temp .= sprintf(
-		'<br/><span class="%1$s_location_head">%2$s</span> <span class="%1$s_location">%3$s</span>',
+		'<span class="%1$s_location_head">%2$s</span> <span class="%1$s_location">%3$s</span>',
 		$cls,
 		esc_html($location_header_name),
 		wp_kses_post($gc_location)

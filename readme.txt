@@ -5,7 +5,7 @@ Tags: Google Calendar
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.9
-Stable tag: 7.4.6
+Stable tag: 7.4.7
 License: GPL v2  or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,9 @@ Set to shift the hours, minutes, and seconds by setting the value of "Fix Timezo
 8. Grouping events by month
 
 == Changelog ==
+= 7.4.7 = 
+* Fixed an issue where the location was being wrapped when `html_tag` was `li-month-notitle`.
+
 = 7.4.6 = 
 * Fixed: Improved link handling for all `view_location` options (link detection and escaping order)
 
